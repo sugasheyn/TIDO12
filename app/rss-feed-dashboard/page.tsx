@@ -57,13 +57,13 @@ export default function RSSFeedDashboard() {
   const [cacheStats, setCacheStats] = useState({ totalFeeds: 0, totalItems: 0 });
 
   useEffect(() => {
-    // Simulate RSS feed status and data for demonstration
-    setFeedStatus({
-      total: 150, // Updated total count with new feeds
-      active: 145,
-      error: 5,
-      lastUpdated: new Date()
-    });
+                    // Simulate RSS feed status and data for demonstration
+                setFeedStatus({
+                  total: 150, // Updated total count with new feeds
+                  active: 145,
+                  error: 5,
+                  lastUpdated: new Date()
+                });
 
     // Mock auto-refresh status
     setAutoRefreshStatus({
@@ -209,7 +209,7 @@ export default function RSSFeedDashboard() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">📡 RSS Feed Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">📡 RSS Feed Dashboard</h1>
           <p className="text-gray-600 mt-2">Monitor and manage 150+ RSS feeds for diabetes information discovery</p>
         </div>
         <Button onClick={refreshData} disabled={isRefreshing} className="flex items-center gap-2">
@@ -270,8 +270,8 @@ export default function RSSFeedDashboard() {
                   <strong>Last error:</strong> {autoRefreshStatus.lastError}
                 </div>
               )}
-            </div>
-            
+      </div>
+
             <div className="flex gap-2">
               {!autoRefreshStatus.isActive ? (
                 <Button onClick={handleStartAutoRefresh} className="bg-green-600 hover:bg-green-700">

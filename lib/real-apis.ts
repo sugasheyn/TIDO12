@@ -219,29 +219,29 @@ export class RealAPIs {
               if (!isRelevant) return null
               
               return {
-                id: `hn_${story.id}`,
-                title: story.title || 'Hacker News Story',
-                description: story.url || 'Technology discussion',
-                category: 'Technology',
-                platform: 'Hacker News',
-                verificationStatus: 'verified',
-                biologicalPlausibility: 'medium',
-                sourceUrl: story.url,
-                author: {
-                  id: story.by || 'anonymous',
-                  username: story.by || 'Anonymous',
-                  reputation: story.score || 0
-                },
-                timestamp: new Date(story.time * 1000).toISOString(),
-                engagementMetrics: {
-                  views: story.score || 0,
-                  likes: story.score || 0,
-                  shares: 0,
-                  comments: story.descendants || 0
-                },
-                tags: ['technology', 'diabetes', 'health'],
-                evidence: [],
-                relatedResearch: []
+          id: `hn_${story.id}`,
+          title: story.title || 'Hacker News Story',
+          description: story.url || 'Technology discussion',
+          category: 'Technology',
+          platform: 'Hacker News',
+          verificationStatus: 'verified',
+          biologicalPlausibility: 'medium',
+          sourceUrl: story.url,
+          author: {
+            id: story.by || 'anonymous',
+            username: story.by || 'Anonymous',
+            reputation: story.score || 0
+          },
+          timestamp: new Date(story.time * 1000).toISOString(),
+          engagementMetrics: {
+            views: story.score || 0,
+            likes: story.score || 0,
+            shares: 0,
+            comments: story.descendants || 0
+          },
+          tags: ['technology', 'diabetes', 'health'],
+          evidence: [],
+          relatedResearch: []
               }
             } catch {
               return null
@@ -275,7 +275,7 @@ export class RealAPIs {
           try {
             const response = await fetch(`https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=10`)
             if (response.ok) {
-              const data = await response.json()
+        const data = await response.json()
               allRepos.push(...(data.items || []))
             }
           } catch (error) {
@@ -339,29 +339,29 @@ export class RealAPIs {
         const allPapers = []
         
         for (const term of searchTerms) {
-          try {
-            // First, search for diabetes papers
+      try {
+        // First, search for diabetes papers
             const searchResponse = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${term}&retmode=json&retmax=5&sort=relevance`)
             if (!searchResponse.ok) continue
-            
-            const searchData = await searchResponse.json()
+        
+        const searchData = await searchResponse.json()
             if (!searchData.esearchresult?.idlist) continue
-            
-            // Then fetch actual paper details
+        
+        // Then fetch actual paper details
             const paperIds = searchData.esearchresult.idlist.slice(0, 5)
-            const papers = await Promise.all(
-              paperIds.map(async (id: string) => {
-                try {
-                  const paperResponse = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${id}&retmode=xml&rettype=abstract`)
-                  if (!paperResponse.ok) return null
-                  
-                  const paperText = await paperResponse.text()
-                  
-                  // Parse XML to extract real content
-                  const titleMatch = paperText.match(/<ArticleTitle>(.*?)<\/ArticleTitle>/)
-                  const abstractMatch = paperText.match(/<AbstractText>(.*?)<\/AbstractText>/)
-                  const authorMatch = paperText.match(/<Author>(.*?)<\/Author>/)
-                  const journalMatch = paperText.match(/<Journal>(.*?)<\/Journal>/)
+        const papers = await Promise.all(
+          paperIds.map(async (id: string) => {
+            try {
+              const paperResponse = await fetch(`https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${id}&retmode=xml&rettype=abstract`)
+              if (!paperResponse.ok) return null
+              
+              const paperText = await paperResponse.text()
+              
+              // Parse XML to extract real content
+              const titleMatch = paperText.match(/<ArticleTitle>(.*?)<\/ArticleTitle>/)
+              const abstractMatch = paperText.match(/<AbstractText>(.*?)<\/AbstractText>/)
+              const authorMatch = paperText.match(/<Author>(.*?)<\/Author>/)
+              const journalMatch = paperText.match(/<Journal>(.*?)<\/Journal>/)
                   const dateMatch = paperText.match(/<PubDate>(.*?)<\/PubDate>/)
                   
                   // Enhanced safe date parsing with multiple fallback strategies
@@ -376,7 +376,7 @@ export class RealAPIs {
                       // Try standard date parsing first
                       try {
                         parsedDate = new Date(dateText)
-                        if (!isNaN(parsedDate.getTime())) {
+                        if (parsedDate && !isNaN(parsedDate.getTime()) && parsedDate.getTime() > 0) {
                           safeTimestamp = parsedDate.toISOString()
                         }
                       } catch {
@@ -388,56 +388,68 @@ export class RealAPIs {
                           const year = parseInt(yearMatch[1])
                           if (year >= 1900 && year <= new Date().getFullYear()) {
                             // Create a date with just the year
-                            parsedDate = new Date(year, 0, 1)
-                            safeTimestamp = parsedDate.toISOString()
+                            try {
+                              parsedDate = new Date(year, 0, 1)
+                              if (parsedDate && !isNaN(parsedDate.getTime()) && parsedDate.getTime() > 0) {
+                                safeTimestamp = parsedDate.toISOString()
+                              }
+                            } catch {
+                              // If even this fails, keep default
+                            }
                           }
                         }
-                      }
-                      
-                      // If all parsing attempts failed, keep default
-                      if (parsedDate && !isNaN(parsedDate.getTime())) {
-                        // safeTimestamp already set above
                       }
                     }
                   } catch (dateError) {
                     console.warn(`Date parsing failed for paper ${id}, using current date:`, dateError)
                     // safeTimestamp already has default value
                   }
-                  
-                  return {
-                    id: `pm_${id}`,
-                    title: titleMatch ? titleMatch[1].replace(/&[^;]+;/g, '') : `Diabetes Research Paper ${id}`,
+              
+              return {
+                id: `pm_${id}`,
+                title: titleMatch ? titleMatch[1].replace(/&[^;]+;/g, '') : `Diabetes Research Paper ${id}`,
                     description: abstractMatch ? abstractMatch[1].replace(/&[^;]+;/g, '').substring(0, 300) + '...' : 'Research paper on Type 1 Diabetes',
-                    category: 'Research',
-                    platform: 'PubMed',
-                    verificationStatus: 'verified',
-                    biologicalPlausibility: 'very_high',
-                    sourceUrl: `https://pubmed.ncbi.nlm.nih.gov/${id}/`,
-                    author: {
-                      id: 'pubmed',
-                      username: authorMatch ? authorMatch[1].replace(/&[^;]+;/g, '') : 'PubMed Authors',
-                      reputation: 100
-                    },
-                    timestamp: safeTimestamp,
-                    engagementMetrics: {
-                      views: Math.floor(Math.random() * 1000) + 100,
-                      likes: Math.floor(Math.random() * 100) + 10,
-                      shares: Math.floor(Math.random() * 50) + 5,
-                      comments: Math.floor(Math.random() * 20) + 2
-                    },
-                    tags: ['research', 'diabetes', 'medical', 'type-1'],
-                    evidence: [],
-                    relatedResearch: [],
+                category: 'Research',
+                platform: 'PubMed',
+                verificationStatus: 'verified',
+                biologicalPlausibility: 'very_high',
+                sourceUrl: `https://pubmed.ncbi.nlm.nih.gov/${id}/`,
+                author: {
+                  id: 'pubmed',
+                  username: authorMatch ? authorMatch[1].replace(/&[^;]+;/g, '') : 'PubMed Authors',
+                  reputation: 100
+                },
+                    timestamp: (() => {
+                      try {
+                        // Final safety check - ensure timestamp is valid
+                        const testDate = new Date(safeTimestamp)
+                        if (testDate && !isNaN(testDate.getTime()) && testDate.getTime() > 0) {
+                          return safeTimestamp
+                        }
+                        return new Date().toISOString()
+                      } catch {
+                        return new Date().toISOString()
+                      }
+                    })(),
+                engagementMetrics: {
+                  views: Math.floor(Math.random() * 1000) + 100,
+                  likes: Math.floor(Math.random() * 100) + 10,
+                  shares: Math.floor(Math.random() * 50) + 5,
+                  comments: Math.floor(Math.random() * 20) + 2
+                },
+                tags: ['research', 'diabetes', 'medical', 'type-1'],
+                evidence: [],
+                relatedResearch: [],
                     journal: journalMatch ? journalMatch[1].replace(/&[^;]+;/g, '') : 'Medical Journal',
                     abstract: abstractMatch ? abstractMatch[1].replace(/&[^;]+;/g, '') : ''
-                  }
-                } catch (error) {
-                  console.error(`Error fetching paper ${id}:`, error)
-                  return null
-                }
-              })
-            )
-            
+              }
+            } catch (error) {
+              console.error(`Error fetching paper ${id}:`, error)
+              return null
+            }
+          })
+        )
+        
             allPapers.push(...papers.filter(Boolean))
           } catch (error) {
             console.error(`Error fetching PubMed data for term: ${term}`, error)
@@ -474,7 +486,7 @@ export class RealAPIs {
           try {
             const response = await fetch(`https://clinicaltrials.gov/api/query/study_fields?expr=${query}&fields=NCTId,BriefTitle,OfficialTitle,Condition,InterventionName,Phase,Status,LeadSponsorName,LocationCountry,OverallStatus,StartDate,CompletionDate,EnrollmentCount&min_rnk=1&max_rnk=10&fmt=json`)
             if (response.ok) {
-              const data = await response.json()
+        const data = await response.json()
               if (data.StudyFieldsResponse?.StudyFields) {
                 allTrials.push(...data.StudyFieldsResponse.StudyFields)
               }
@@ -538,7 +550,7 @@ export class RealAPIs {
           try {
             const response = await fetch(`https://www.reddit.com/r/${subreddit}/hot.json?limit=10`)
             if (response.ok) {
-              const data = await response.json()
+        const data = await response.json()
               const posts = data.data?.children?.slice(0, 5) || []
               
               allPosts.push(...posts.map((post: any) => ({
@@ -609,21 +621,21 @@ export class RealAPIs {
             verificationStatus: 'community',
             biologicalPlausibility: 'medium',
             sourceUrl: `https://${platform.toLowerCase()}.com/discussion/${i}`,
-            author: {
+          author: {
               id: `user_${i}`,
               username: `CommunityMember${i}`,
               reputation: Math.floor(Math.random() * 100) + 10
             },
             timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-            engagementMetrics: {
+          engagementMetrics: {
               views: Math.floor(Math.random() * 200) + 20,
-              likes: Math.floor(Math.random() * 50) + 5,
-              shares: Math.floor(Math.random() * 20) + 2,
+            likes: Math.floor(Math.random() * 50) + 5,
+            shares: Math.floor(Math.random() * 20) + 2,
               comments: Math.floor(Math.random() * 15) + 1
-            },
+          },
             tags: ['community', 'diabetes', topic.replace(' ', '-')],
-            evidence: [],
-            relatedResearch: [],
+          evidence: [],
+          relatedResearch: [],
             platformType: 'health-social',
             topic: topic
           })
@@ -738,7 +750,7 @@ export class RealAPIs {
       };
 
       // Return validated data with proper structure
-      return {
+        return {
         ...finalData,
         totalSources: 7,
         totalItems: validatedData.hackerNews.length + validatedData.github.length + validatedData.pubmed.length + 
@@ -755,7 +767,7 @@ export class RealAPIs {
                            validatedData.rss.length
         }
       };
-    } catch (error) {
+      } catch (error) {
       console.error('Error fetching all real data:', error);
       // Return empty data structure on error
       return {
@@ -781,8 +793,8 @@ export class RealAPIs {
   async getRealTimeSummary() {
     try {
       const allData = await this.getAllRealData();
-      
-      return {
+        
+        return {
         overview: {
           totalSources: allData.totalSources,
           totalItems: allData.totalItems,
@@ -823,7 +835,7 @@ export class RealAPIs {
           latestContent: allData.rss.all.slice(0, 10) // Show latest 10 RSS items
         }
       };
-    } catch (error) {
+      } catch (error) {
       console.error('Error getting real-time summary:', error);
       return {
         overview: { totalSources: 0, totalItems: 0, lastUpdated: new Date().toISOString() },

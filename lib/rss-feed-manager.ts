@@ -297,14 +297,14 @@ export class RSSFeedManager {
         try {
           const response = await fetch(feed.json);
           if (response.ok) {
-            const data = await response.json();
-            return this.parseRedditJSON(data, feed);
+      const data = await response.json();
+      return this.parseRedditJSON(data, feed);
           }
-        } catch (error) {
+    } catch (error) {
           console.log(`JSON fetch failed for ${feed.name}, trying RSS:`, error);
         }
       }
-
+      
       // Try RSS/XML
       try {
         const response = await fetch(feed.rss);
@@ -319,7 +319,7 @@ export class RSSFeedManager {
       return [];
     } catch (error) {
       console.error(`Error fetching feed ${feed.name}:`, error);
-      return [];
+        return [];
     }
   }
 
@@ -411,9 +411,9 @@ export class RSSFeedManager {
               content: description,
               author: 'RSS Feed',
               timestamp: timestamp,
-              source: feed.name,
-              category: feed.category,
-              url: link,
+            source: feed.name,
+            category: feed.category,
+            url: link,
               engagement: {
                 upvotes: 0,
                 comments: 0,
@@ -584,8 +584,8 @@ export class RSSFeedManager {
     
     for (const [feedName, content] of this.contentCache.entries()) {
       if (content && Array.isArray(content)) {
-        allContent.push(...content);
-      }
+      allContent.push(...content);
+    }
     }
     
     // Sort by timestamp (newest first)
@@ -879,14 +879,26 @@ export class RSSFeedManager {
   }
 
   /**
-   * Enhanced content fetching with better error handling
+   * Enhanced content fetching with better error handling, timeout, and memory management
    */
   private async fetchFeedWithRetry(feed: RSSFeed, maxRetries: number = 3): Promise<RSSFeedContent[]> {
     let lastError: Error | null = null;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const content = await this.fetchFeed(feed);
+        // Add timeout to prevent hanging requests
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), 30000) // 30 second timeout
+        });
+        
+        const fetchPromise = this.fetchFeed(feed);
+        const content = await Promise.race([fetchPromise, timeoutPromise]);
+        
+        // Memory management: limit content size
+        if (content.length > 100) {
+          console.warn(`Feed "${feed.name}" returned ${content.length} items, limiting to 100`);
+          content.splice(100); // Keep only first 100 items
+        }
         
         // Update feed status on success
         if (content.length > 0) {
@@ -900,8 +912,10 @@ export class RSSFeedManager {
         console.warn(`Attempt ${attempt} failed for feed "${feed.name}":`, lastError.message);
         
         if (attempt < maxRetries) {
-          // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
+          // Exponential backoff with jitter
+          const baseDelay = 1000 * Math.pow(2, attempt - 1);
+          const jitter = Math.random() * 1000;
+          await new Promise(resolve => setTimeout(resolve, baseDelay + jitter));
         }
       }
     }
@@ -913,3 +927,4 @@ export class RSSFeedManager {
     return [];
   }
 }
+

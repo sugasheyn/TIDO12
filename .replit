@@ -1,0 +1,38 @@
+language = "nodejs"
+run = "npm run dev"
+entrypoint = "app/page.tsx"
+
+[nix]
+channel = "stable-22_11"
+
+[env]
+NODE_ENV = "development"
+NEXT_PUBLIC_APP_NAME = "T1D AI Platform"
+NEXT_PUBLIC_APP_VERSION = "2.0.0"
+NEXT_PUBLIC_API_BASE_URL = "/api"
+NEXTAUTH_SECRET = "replit-deployment-secret-key-change-in-production"
+GOOGLE_CLIENT_SECRET = "optional"
+GITHUB_SECRET = "optional"
+
+[packager]
+language = "nodejs"
+
+[packager.features]
+packageSearch = true
+guessImports = true
+
+[languages.javascript]
+pattern = "**/*.js"
+syntax = "javascript"
+
+[languages.typescript]
+pattern = "**/*.ts"
+syntax = "typescript"
+
+[languages.tsx]
+pattern = "**/*.tsx"
+syntax = "tsx"
+
+[deployment]
+run = ["sh", "-c", "npm run build && npm start"]
+deploymentTarget = "cloudrun"

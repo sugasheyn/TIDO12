@@ -34,8 +34,14 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       data: {
         glucose: {
-          current: glucoseData[glucoseData.length - 1],
-          history: glucoseData.slice(-24), // Last 24 readings
+          current: {
+            ...glucoseData[glucoseData.length - 1],
+            timestamp: glucoseData[glucoseData.length - 1].timestamp.toISOString()
+          },
+          history: glucoseData.slice(-24).map(item => ({
+            ...item,
+            timestamp: item.timestamp.toISOString()
+          })), // Last 24 readings
           trends: comprehensiveInsights.patterns.find(p => p.type === 'glucose_trend')?.data || null
         },
         ai: {
@@ -119,7 +125,7 @@ function generateRealisticGlucoseData() {
     baseValue = Math.max(40, Math.min(400, baseValue))
     
     data.push({
-      timestamp: timestamp.toISOString(),
+      timestamp: timestamp, // Keep as Date object for AI analysis
       value: Math.round(baseValue),
       unit: 'mg/dL',
       source: 'AI Generated',
