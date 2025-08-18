@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TrendingUp, Activity, AlertTriangle, Clock, Target, Zap } from "lucide-react"
-import { dataGenerator } from "@/lib/data-generator"
+import { realAPIs } from "@/lib/real-apis"
 
 interface CGMData {
   id: string
@@ -36,37 +36,57 @@ export function CGMInsights() {
   const [selectedTimeframe, setSelectedTimeframe] = useState("24h")
 
   useEffect(() => {
-    const generateData = () => {
-      const data = Array.from({ length: 24 }, (_, i) => ({
-        id: `cgm-${i}`,
-        timestamp: new Date(Date.now() - (23 - i) * 60 * 60 * 1000),
-        glucose: Math.floor(Math.random() * 200) + 80,
-        trend: ["↗️", "↘️", "→", "↗️", "↘️"][Math.floor(Math.random() * 5)],
-        insulin: Math.floor(Math.random() * 15) + 2,
-        carbs: Math.floor(Math.random() * 60) + 15,
-        notes: ["Pre-meal", "Post-meal", "Exercise", "Sleep", "Stress"][Math.floor(Math.random() * 5)],
-        source: "Dexcom G7"
-      }))
-      setCgmData(data)
+    const generateData = async () => {
+      try {
+        const data = Array.from({ length: 24 }, (_, i) => ({
+          id: `cgm-${i}`,
+          timestamp: new Date(Date.now() - (23 - i) * 60 * 60 * 1000),
+          glucose: Math.floor(Math.random() * 200) + 80,
+          trend: ["↗️", "↘️", "→", "↗️", "↘️"][Math.floor(Math.random() * 5)],
+          insulin: Math.floor(Math.random() * 15) + 2,
+          carbs: Math.floor(Math.random() * 60) + 15,
+          notes: ["Pre-meal", "Post-meal", "Exercise", "Sleep", "Stress"][Math.floor(Math.random() * 5)],
+          source: "Dexcom G7"
+        }))
+        setCgmData(data)
 
-      const patternData = dataGenerator.generateAIPatterns().slice(0, 5).map((pattern, i) => ({
-        id: `pattern-${i}`,
-        type: pattern.type,
-        description: pattern.description,
-        confidence: pattern.confidence,
-        impact: pattern.impact,
-        recommendations: pattern.recommendations
-      }))
-      setPatterns(patternData)
-      setLoading(false)
+        // Get real health correlation data for patterns
+        try {
+          const healthData = await realAPIs.getHealthCorrelationData()
+          const patternData = (healthData?.correlations || []).slice(0, 5).map((pattern: any, i: number) => ({
+            id: `pattern-${i}`,
+            type: pattern.type || 'Unknown',
+            description: pattern.description || 'No description available',
+            confidence: (pattern.confidence || 0) * 100, // Convert to percentage
+            impact: 'High', // Default impact level
+            recommendations: [
+              'Monitor environmental factors',
+              'Track correlation patterns',
+              'Adjust management strategies'
+            ]
+          }))
+          setPatterns(patternData)
+        } catch (patternError) {
+          console.warn('Failed to fetch health patterns:', patternError)
+          setPatterns([])
+        }
+        
+        setLoading(false)
+      } catch (error) {
+        console.error('Failed to generate CGM data:', error)
+        setCgmData([])
+        setPatterns([])
+        setLoading(false)
+      }
     }
 
     generateData()
   }, [])
 
-  const currentGlucose = cgmData[cgmData.length - 1]?.glucose || 120
+  // Safe access to data
+  const currentGlucose = cgmData.length > 0 ? cgmData[cgmData.length - 1]?.glucose || 120 : 120
   const glucoseStatus = currentGlucose < 70 ? "low" : currentGlucose > 180 ? "high" : "normal"
-  const averageGlucose = cgmData.length > 0 ? cgmData.reduce((sum, d) => sum + d.glucose, 0) / cgmData.length : 0
+  const averageGlucose = cgmData.length > 0 ? cgmData.reduce((sum, d) => sum + (d?.glucose || 0), 0) / cgmData.length : 0
 
   if (loading) {
     return (

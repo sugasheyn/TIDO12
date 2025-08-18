@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server"
+import { realAPIs } from "@/lib/real-apis"
 
 export async function GET() {
   try {
-    // Generate realistic sample glucose data
-    const glucoseData = generateSampleGlucoseData()
+    // Get real health correlation data including weather, air quality, and nutrition
+    const healthData = await realAPIs.getHealthCorrelationData()
     
-    // Simulate API delay for realistic behavior
-    await new Promise(resolve => setTimeout(resolve, 200))
+    // Generate realistic glucose data based on real environmental factors
+    const glucoseData = generateRealisticGlucoseData(healthData)
     
     return NextResponse.json({
       success: true,
@@ -25,6 +26,7 @@ export async function GET() {
           ? glucoseData.filter(d => d.metadata.confidence > 0.7).length / glucoseData.length
           : 0
       },
+      environmentalFactors: healthData,
       lastUpdated: new Date(),
       nextUpdate: new Date(Date.now() + 60 * 60 * 1000) // Next hour
     })
@@ -42,14 +44,18 @@ export async function GET() {
   }
 }
 
-// Generate realistic sample glucose data
-function generateSampleGlucoseData() {
+// Generate realistic glucose data based on real environmental factors
+function generateRealisticGlucoseData(healthData: any) {
   const data = []
   const devices = ['Dexcom G6', 'FreeStyle Libre 3', 'Medtronic Guardian 4', 'Tandem t:slim X2']
   const mealContexts = ['fasting', 'pre-meal', 'post-meal', 'bedtime']
   const exerciseContexts = ['before', 'during', 'after', 'none']
   const stressLevels = ['low', 'medium', 'high']
   const sleepQualities = ['poor', 'fair', 'good', 'excellent']
+  
+  // Use real weather data if available
+  const weather = healthData?.weather?.data || {}
+  const airQuality = healthData?.airQuality?.data || {}
   
   // Generate 24 hours of data (96 data points, every 15 minutes)
   for (let i = 0; i < 96; i++) {
@@ -63,9 +69,23 @@ function generateSampleGlucoseData() {
     if (hour >= 18 && hour <= 20) baseGlucose = 150 // Dinner spike
     if (hour >= 22 || hour <= 4) baseGlucose = 100 // Night time lower
     
+    // Add environmental impact based on real data
+    let environmentalImpact = 0
+    if (weather.hourly?.temperature_2m?.[i]) {
+      const temp = weather.hourly.temperature_2m[i]
+      // Temperature impact: extreme temperatures can affect glucose
+      if (temp > 30 || temp < 5) environmentalImpact += 10
+    }
+    
+    if (airQuality.results?.[0]) {
+      const aqi = airQuality.results[0].value
+      // Air quality impact: poor air quality can affect health
+      if (aqi > 100) environmentalImpact += 5
+    }
+    
     // Add realistic variability
     const variability = (Math.random() - 0.5) * 60
-    const glucose = Math.max(70, Math.min(300, Math.round(baseGlucose + variability)))
+    const glucose = Math.max(70, Math.min(300, Math.round(baseGlucose + variability + environmentalImpact)))
     
     data.push({
       timestamp,
@@ -79,10 +99,11 @@ function generateSampleGlucoseData() {
       stressLevel: stressLevels[Math.floor(Math.random() * stressLevels.length)],
       sleepQuality: sleepQualities[Math.floor(Math.random() * sleepQualities.length)],
       weather: {
-        temperature: Math.round(20 + (Math.random() - 0.5) * 20),
-        humidity: Math.round(40 + Math.random() * 40),
+        temperature: weather.hourly?.temperature_2m?.[i] || Math.round(20 + (Math.random() - 0.5) * 20),
+        humidity: weather.hourly?.relative_humidity_2m?.[i] || Math.round(40 + Math.random() * 40),
         pressure: Math.round(1000 + (Math.random() - 0.5) * 50)
       },
+      airQuality: airQuality.results?.[0] || { value: 50, unit: 'AQI' },
       metadata: {
         confidence: Math.random() * 0.3 + 0.7, // 70-100% confidence
         calibration: Math.random() > 0.8, // 20% chance of recent calibration

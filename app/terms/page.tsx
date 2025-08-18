@@ -2,282 +2,281 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Shield, Users, Heart, FileText } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { FileText, Shield, Users, Heart, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Platform
-            </Link>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Terms of Service</h1>
+            <p className="text-gray-600 mt-1">
+              Our terms and conditions for using the platform
+            </p>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Terms of Service</h1>
-          <p className="text-lg text-gray-600">Last updated: {new Date().toLocaleDateString()}</p>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Link>
+          </Button>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Introduction */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-emerald-600" />
-                Introduction
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                Welcome to the T1D AI Platform ("Platform"), a comprehensive research and monitoring system designed to serve the Type 1 diabetes community. These Terms of Service ("Terms") govern your use of our platform and services.
-              </p>
-              <p className="text-gray-700">
-                By accessing or using the Platform, you agree to be bound by these Terms. If you disagree with any part of these terms, you may not access the Platform.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Platform Description */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Heart className="h-5 w-5 text-red-600" />
-                Platform Description
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                The T1D AI Platform provides:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Real-time monitoring of 50,000+ global T1D research sources</li>
-                <li>AI-powered pattern detection and insights</li>
-                <li>Community engagement and knowledge sharing</li>
-                <li>Personalized health recommendations</li>
-                <li>Research project collaboration tools</li>
-                <li>Comprehensive analytics and reporting</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* User Accounts */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
-                User Accounts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                To access certain features of the Platform, you must create an account. You are responsible for:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Maintaining the confidentiality of your account credentials</li>
-                <li>All activities that occur under your account</li>
-                <li>Providing accurate and complete information</li>
-                <li>Notifying us immediately of any unauthorized use</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Acceptable Use */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-purple-600" />
-                Acceptable Use
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                You agree to use the Platform only for lawful purposes and in accordance with these Terms. You agree not to:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Use the Platform for any illegal or unauthorized purpose</li>
-                <li>Violate any applicable laws or regulations</li>
-                <li>Infringe on the rights of others</li>
-                <li>Attempt to gain unauthorized access to the Platform</li>
-                <li>Interfere with or disrupt the Platform's operation</li>
-                <li>Share false or misleading information</li>
-              </ul>
-            </CardContent>
-          </Card>
-
-          {/* Content and Data */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-green-600" />
-                Content and Data
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                The Platform aggregates and analyzes data from multiple sources including:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Peer-reviewed research publications</li>
-                <li>Clinical trial data and results</li>
-                <li>Community discussions and experiences</li>
-                <li>Device and technology reports</li>
-                <li>Healthcare provider insights</li>
-              </ul>
-              <p className="text-gray-700">
-                While we strive for accuracy, we cannot guarantee the completeness or reliability of all information. Users should always consult healthcare professionals for medical decisions.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Privacy and Data Protection */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-indigo-600" />
-                Privacy and Data Protection
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                Your privacy is important to us. Our collection and use of personal information is governed by our Privacy Policy, which is incorporated into these Terms by reference.
-              </p>
-              <p className="text-gray-700">
-                We implement appropriate security measures to protect your data and comply with applicable data protection laws.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Intellectual Property */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-orange-600" />
-                Intellectual Property
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                The Platform and its original content, features, and functionality are owned by the T1D AI Platform and are protected by international copyright, trademark, and other intellectual property laws.
-              </p>
-              <p className="text-gray-700">
-                Users retain ownership of content they submit, but grant us a license to use, display, and distribute such content on the Platform.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Disclaimers */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-red-600" />
-                Disclaimers
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                THE PLATFORM IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Warranties of merchantability or fitness for a particular purpose</li>
-                <li>Warranties that the Platform will be uninterrupted or error-free</li>
-                <li>Warranties regarding the accuracy or reliability of information</li>
-                <li>Warranties that defects will be corrected</li>
-              </ul>
-              <p className="text-gray-700">
-                The Platform is not a substitute for professional medical advice, diagnosis, or treatment.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Limitation of Liability */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-gray-600" />
-                Limitation of Liability
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                IN NO EVENT SHALL THE T1D AI PLATFORM BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATING TO YOUR USE OF THE PLATFORM.
-              </p>
-              <p className="text-gray-700">
-                Our total liability to you for any claims arising from these Terms or your use of the Platform shall not exceed the amount you paid us, if any, in the twelve months preceding the claim.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Termination */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-red-600" />
-                Termination
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We may terminate or suspend your account and access to the Platform immediately, without prior notice, for any reason, including breach of these Terms.
-              </p>
-              <p className="text-gray-700">
-                Upon termination, your right to use the Platform will cease immediately, and we may delete your account and data.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Changes to Terms */}
-          <Card className="shadow-lg border-0">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-blue-600" />
-                Changes to Terms
+                Agreement to Terms
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We reserve the right to modify these Terms at any time. We will notify users of any material changes by posting the new Terms on the Platform.
-              </p>
-              <p className="text-gray-700">
-                Your continued use of the Platform after such modifications constitutes acceptance of the updated Terms.
+            <CardContent>
+              <p className="text-gray-700 leading-relaxed">
+                By accessing and using T1D Discovery Hub, you accept and agree to be bound by the terms and provision of this agreement. 
+                If you do not agree to abide by the above, please do not use this service.
               </p>
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
-          <Card className="shadow-lg border-0">
+          {/* Service Description */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-emerald-600" />
-                Contact Information
+                <Heart className="h-5 w-5 text-red-600" />
+                Description of Service
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                If you have any questions about these Terms, please contact us:
-              </p>
-              <div className="bg-gray-50 p-4 rounded-lg">
+            <CardContent>
+              <div className="space-y-4">
                 <p className="text-gray-700">
-                  <strong>Email:</strong> legal@t1daiplatform.com<br />
-                  <strong>Address:</strong> T1D AI Platform Legal Team<br />
-                  <strong>Response Time:</strong> Within 48 hours
+                  T1D Discovery Hub is a comprehensive platform designed to:
                 </p>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Provide AI-powered insights and discoveries related to Type 1 Diabetes</li>
+                  <li>Connect users with global diabetes research and community resources</li>
+                  <li>Offer personalized health recommendations and pattern analysis</li>
+                  <li>Facilitate community engagement and knowledge sharing</li>
+                  <li>Support research participation and data contribution</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
 
-          {/* Back to Platform */}
-          <div className="text-center">
-            <Button asChild size="lg">
-              <Link href="/">
-                Return to Platform
-              </Link>
-            </Button>
+          {/* User Responsibilities */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-green-600" />
+                User Responsibilities
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Account Management</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Maintain accurate and up-to-date account information</li>
+                    <li>Protect your login credentials and account security</li>
+                    <li>Notify us immediately of any unauthorized access</li>
+                    <li>Use the platform in compliance with applicable laws</li>
+                  </ul>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Content & Behavior</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Provide accurate and truthful information</li>
+                    <li>Respect other users and community guidelines</li>
+                    <li>Not share harmful, misleading, or inappropriate content</li>
+                    <li>Respect intellectual property rights</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Privacy & Data */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-purple-600" />
+                Privacy & Data Protection
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-gray-700">
+                  Your privacy is important to us. Our data collection and usage practices are outlined in our Privacy Policy, 
+                  which is incorporated into these Terms of Service.
+                </p>
+                
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-gray-700 text-sm">
+                    <strong>Key Points:</strong><br />
+                    • We collect only necessary information to provide our services<br />
+                    • Your health data is protected and anonymized for research<br />
+                    • You control what information is shared and with whom<br />
+                    • We never sell your personal information to third parties
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Intellectual Property */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Intellectual Property</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Platform Content</h3>
+                  <p className="text-gray-700">
+                    The platform, including its original content, features, and functionality, is owned by T1D Discovery Hub 
+                    and is protected by international copyright, trademark, and other intellectual property laws.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">User Content</h3>
+                  <p className="text-gray-700">
+                    You retain ownership of content you submit to the platform. By submitting content, you grant us a 
+                    non-exclusive, worldwide license to use, display, and distribute your content in connection with our services.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Disclaimers */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Disclaimers & Limitations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Medical Information</h3>
+                  <p className="text-gray-700">
+                    The information provided on this platform is for educational and informational purposes only. 
+                    It is not intended as medical advice and should not replace consultation with qualified healthcare professionals.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Service Availability</h3>
+                  <p className="text-gray-700">
+                    We strive to maintain high service availability but cannot guarantee uninterrupted access. 
+                    The platform may be temporarily unavailable due to maintenance, updates, or technical issues.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Limitation of Liability</h3>
+                  <p className="text-gray-700">
+                    T1D Discovery Hub shall not be liable for any indirect, incidental, special, consequential, 
+                    or punitive damages resulting from your use of the platform.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Termination */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Termination</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Termination by User</h3>
+                  <p className="text-gray-700">
+                    You may terminate your account at any time by contacting our support team or using the account deletion 
+                    feature in your settings.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Termination by Platform</h3>
+                  <p className="text-gray-700">
+                    We may terminate or suspend your account if you violate these terms, engage in fraudulent activity, 
+                    or for other legitimate business reasons.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Data Retention</h3>
+                  <p className="text-gray-700">
+                    Upon account termination, we will delete or anonymize your personal data within 30 days, 
+                    except where retention is required by law or for legitimate business purposes.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Changes to Terms */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Changes to Terms</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700">
+                We reserve the right to modify these terms at any time. We will notify users of significant changes 
+                through email notifications or platform announcements. Your continued use of the platform after changes 
+                constitutes acceptance of the updated terms.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Contact */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+              <CardDescription>
+                Questions about these terms of service?
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-gray-700">
+                  If you have any questions about these Terms of Service, please contact us:
+                </p>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-gray-700">
+                    <strong>Email:</strong> legal@t1ddiscoveryhub.com<br />
+                    <strong>Address:</strong> Legal Team, T1D Discovery Hub<br />
+                    <strong>Response Time:</strong> Within 5 business days
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Last Updated */}
+          <div className="text-center text-sm text-gray-500">
+            <p>Last updated: {new Date().toLocaleDateString()}</p>
+            <p>Version: 1.0</p>
           </div>
         </div>
       </div>

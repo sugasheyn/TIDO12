@@ -69,3 +69,60 @@ export interface CollectionJob {
   itemsCollected: number
   errorMessage?: string
 }
+
+// User Authentication & Profile Types
+export interface UserProfile {
+  id: string
+  email: string
+  username: string
+  displayName?: string
+  avatar?: string
+  dateOfBirth?: string
+  diagnosisDate?: string
+  diabetesType: 'type1' | 'type2' | 'gestational' | 'prediabetes' | 'other'
+  location?: string
+  timezone?: string
+  preferences: {
+    notifications: boolean
+    emailUpdates: boolean
+    privacyLevel: 'public' | 'friends' | 'private'
+    language: string
+    units: 'mg/dL' | 'mmol/L'
+  }
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface PinnedContent {
+  id: string
+  userId: string
+  type: 'discovery' | 'correlation' | 'research' | 'community_post' | 'ai_insight'
+  contentId: string
+  title: string
+  description: string
+  url?: string
+  tags: string[]
+  pinnedAt: Date
+}
+
+export interface DiscoverySubscription {
+  id: string
+  userId: string
+  type: 'glucose_patterns' | 'medication_insights' | 'device_updates' | 'research_breakthroughs' | 'community_trends' | 'ai_discoveries'
+  frequency: 'daily' | 'weekly' | 'monthly' | 'on_demand'
+  active: boolean
+  lastSent?: Date
+  preferences: {
+    email: boolean
+    push: boolean
+    inApp: boolean
+    severity: 'all' | 'important' | 'critical'
+  }
+  createdAt: Date
+}
+
+export interface UserSession {
+  user: UserProfile
+  isAuthenticated: boolean
+  accessToken?: string
+}

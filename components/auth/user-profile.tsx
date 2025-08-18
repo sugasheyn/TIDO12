@@ -71,6 +71,13 @@ export function UserProfile() {
         <DropdownMenuSeparator />
         
         <DropdownMenuItem asChild>
+          <Link href="/dashboard" className="flex items-center">
+            <User className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem asChild>
           <Link href="/profile" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
             <span>Profile</span>

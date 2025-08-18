@@ -2,345 +2,252 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Shield, Eye, Lock, Database, Users, Bell, Globe } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { Shield, Lock, Eye, Database, Users, Heart, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto p-6 space-y-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Platform
-            </Link>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Privacy Policy</h1>
+            <p className="text-gray-600 mt-1">
+              How we protect and handle your data
+            </p>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-          <p className="text-lg text-gray-600">Last updated: {new Date().toLocaleDateString()}</p>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Dashboard
+            </Link>
+          </Button>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Introduction */}
-          <Card className="shadow-lg border-0">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-emerald-600" />
-                Introduction
+                <Shield className="h-5 w-5 text-blue-600" />
+                Our Commitment to Privacy
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                At the T1D AI Platform, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
-              </p>
-              <p className="text-gray-700">
-                By using the T1D AI Platform, you consent to the data practices described in this policy. If you do not agree with our policies and practices, please do not use our platform.
+            <CardContent>
+              <p className="text-gray-700 leading-relaxed">
+                At T1D Discovery Hub, we are committed to protecting your privacy and ensuring the security of your personal information. 
+                This privacy policy explains how we collect, use, and safeguard your data when you use our platform.
               </p>
             </CardContent>
           </Card>
 
-          {/* Information We Collect */}
-          <Card className="shadow-lg border-0">
+          {/* Data Collection */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-blue-600" />
+                <Database className="h-5 w-5 text-green-600" />
                 Information We Collect
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <h3 className="font-semibold text-gray-800">Personal Information</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Name and contact information (email address)</li>
-                <li>Profile information and preferences</li>
-                <li>Authentication credentials (Google OAuth data)</li>
-                <li>Communication preferences</li>
-              </ul>
-
-              <h3 className="font-semibold text-gray-800 mt-4">Health-Related Information</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>T1D diagnosis date and management preferences</li>
-                <li>Health interests and research focus areas</li>
-                <li>Community participation and engagement data</li>
-                <li>Platform usage patterns and preferences</li>
-              </ul>
-
-              <h3 className="font-semibold text-gray-800 mt-4">Technical Information</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Device information and browser type</li>
-                <li>IP address and location data</li>
-                <li>Usage analytics and performance metrics</li>
-                <li>Cookies and similar tracking technologies</li>
-              </ul>
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Personal Information</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Email address and basic profile information</li>
+                  <li>Diabetes type and diagnosis information (optional)</li>
+                  <li>Location and timezone preferences</li>
+                  <li>Platform usage and interaction data</li>
+                </ul>
+              </div>
+              
+              <Separator />
+              
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Health Data</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Glucose readings and diabetes management data (if uploaded)</li>
+                  <li>Device information and settings</li>
+                  <li>Research participation preferences</li>
+                  <li>Community interaction data</li>
+                </ul>
+              </div>
             </CardContent>
           </Card>
 
-          {/* How We Use Your Information */}
-          <Card className="shadow-lg border-0">
+          {/* Data Usage */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5 text-purple-600" />
                 How We Use Your Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">We use the information we collect to:</p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Provide and maintain the T1D AI Platform services</li>
-                <li>Personalize your experience and content recommendations</li>
-                <li>Process and manage your account and profile</li>
-                <li>Send important updates and notifications</li>
-                <li>Improve our platform and develop new features</li>
-                <li>Conduct research and analytics (anonymized)</li>
-                <li>Ensure platform security and prevent fraud</li>
-                <li>Comply with legal obligations</li>
-              </ul>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Platform Functionality</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Provide personalized diabetes insights and recommendations</li>
+                    <li>Connect you with relevant research and community content</li>
+                    <li>Improve our AI models and discovery algorithms</li>
+                    <li>Send important updates and notifications</li>
+                  </ul>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Research & Development</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Contribute to diabetes research (with your consent)</li>
+                    <li>Improve platform features and user experience</li>
+                    <li>Develop new AI capabilities for diabetes management</li>
+                    <li>Identify trends and patterns in diabetes care</li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Information Sharing */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-green-600" />
-                Information Sharing and Disclosure
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We do not sell, trade, or rent your personal information to third parties. We may share your information in the following circumstances:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li><strong>With Your Consent:</strong> When you explicitly authorize us to share information</li>
-                <li><strong>Service Providers:</strong> With trusted partners who assist in platform operations</li>
-                <li><strong>Legal Requirements:</strong> When required by law or legal process</li>
-                <li><strong>Safety and Security:</strong> To protect our users and platform</li>
-                <li><strong>Business Transfers:</strong> In connection with company mergers or acquisitions</li>
-              </ul>
-              <p className="text-gray-700">
-                All third-party service providers are bound by strict confidentiality agreements and may only use your information for specified purposes.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Data Security */}
-          <Card className="shadow-lg border-0">
+          {/* Data Protection */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-red-600" />
-                Data Security
+                How We Protect Your Data
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We implement comprehensive security measures to protect your personal information:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>End-to-end encryption for data transmission</li>
-                <li>Secure authentication and access controls</li>
-                <li>Regular security audits and vulnerability assessments</li>
-                <li>Employee training on data protection</li>
-                <li>Incident response and breach notification procedures</li>
-                <li>Compliance with industry security standards</li>
-              </ul>
-              <p className="text-gray-700">
-                While we strive to protect your information, no method of transmission over the internet is 100% secure. We cannot guarantee absolute security but continuously work to improve our security measures.
-              </p>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Security Measures</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>End-to-end encryption for sensitive data</li>
+                    <li>Regular security audits and updates</li>
+                    <li>Secure cloud infrastructure with industry standards</li>
+                    <li>Access controls and authentication protocols</li>
+                  </ul>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Data Anonymization</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Personal identifiers are removed for research purposes</li>
+                    <li>Aggregated data is used for trend analysis</li>
+                    <li>Individual privacy is maintained in all research</li>
+                    <li>You control what data is shared for research</li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Data Retention */}
-          <Card className="shadow-lg border-0">
+          {/* Data Sharing */}
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-orange-600" />
-                Data Retention
+                <Users className="h-5 w-5 text-orange-600" />
+                Data Sharing & Third Parties
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We retain your personal information for as long as necessary to:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Provide our services and maintain your account</li>
-                <li>Comply with legal obligations and regulations</li>
-                <li>Resolve disputes and enforce agreements</li>
-                <li>Improve our platform and services</li>
-              </ul>
-              <p className="text-gray-700">
-                When you delete your account, we will delete or anonymize your personal information within 30 days, except where retention is required by law.
-              </p>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">We Do Not Sell Your Data</h3>
+                  <p className="text-gray-700">
+                    We will never sell, rent, or trade your personal information to third parties for marketing purposes.
+                  </p>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Limited Sharing</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Research partners (with your explicit consent)</li>
+                    <li>Service providers who help operate our platform</li>
+                    <li>Legal requirements or safety concerns</li>
+                    <li>Community features you choose to participate in</li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
           {/* Your Rights */}
-          <Card className="shadow-lg border-0">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-indigo-600" />
-                Your Privacy Rights
+                <Heart className="h-5 w-5 text-pink-600" />
+                Your Rights & Choices
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                You have the following rights regarding your personal information:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li><strong>Access:</strong> Request a copy of your personal information</li>
-                <li><strong>Correction:</strong> Update or correct inaccurate information</li>
-                <li><strong>Deletion:</strong> Request deletion of your personal information</li>
-                <li><strong>Portability:</strong> Receive your data in a portable format</li>
-                <li><strong>Restriction:</strong> Limit how we use your information</li>
-                <li><strong>Objection:</strong> Object to certain processing activities</li>
-                <li><strong>Withdrawal:</strong> Withdraw consent for data processing</li>
-              </ul>
-              <p className="text-gray-700">
-                To exercise these rights, contact us at privacy@t1daiplatform.com. We will respond to your request within 30 days.
-              </p>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Control Your Data</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Access and review your personal information</li>
+                    <li>Update or correct inaccurate data</li>
+                    <li>Delete your account and associated data</li>
+                    <li>Control notification preferences</li>
+                  </ul>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-2">Privacy Settings</h3>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    <li>Choose your privacy level (public, friends, private)</li>
+                    <li>Opt in or out of research participation</li>
+                    <li>Control data sharing preferences</li>
+                    <li>Manage community visibility</li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Cookies and Tracking */}
-          <Card className="shadow-lg border-0">
+          {/* Contact */}
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-teal-600" />
-                Cookies and Tracking Technologies
-              </CardTitle>
+              <CardTitle>Contact Us</CardTitle>
+              <CardDescription>
+                Questions about our privacy policy or data practices?
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We use cookies and similar technologies to:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Remember your preferences and settings</li>
-                <li>Analyze platform usage and performance</li>
-                <li>Provide personalized content and recommendations</li>
-                <li>Ensure platform security and functionality</li>
-                <li>Improve user experience and navigation</li>
-              </ul>
-              <p className="text-gray-700">
-                You can control cookie settings through your browser preferences. However, disabling certain cookies may affect platform functionality.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Third-Party Services */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-yellow-600" />
-                Third-Party Services
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                Our platform integrates with third-party services:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li><strong>Google OAuth:</strong> For user authentication</li>
-                <li><strong>Analytics Services:</strong> For platform performance monitoring</li>
-                <li><strong>Research Databases:</strong> For T1D research content</li>
-                <li><strong>Cloud Services:</strong> For data storage and processing</li>
-              </ul>
-              <p className="text-gray-700">
-                These services have their own privacy policies. We encourage you to review them to understand how they handle your information.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Children's Privacy */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-pink-600" />
-                Children's Privacy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                The T1D AI Platform is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
-              </p>
-              <p className="text-gray-700">
-                If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately. We will take steps to remove such information from our records.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* International Transfers */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-blue-600" />
-                International Data Transfers
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                Your information may be transferred to and processed in countries other than your own. We ensure that such transfers comply with applicable data protection laws.
-              </p>
-              <p className="text-gray-700">
-                For users in the European Economic Area (EEA), we implement appropriate safeguards such as Standard Contractual Clauses to protect your data during international transfers.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Changes to Privacy Policy */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-green-600" />
-                Changes to This Privacy Policy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                We may update this Privacy Policy from time to time. We will notify you of any material changes by:
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 ml-4">
-                <li>Posting the updated policy on our platform</li>
-                <li>Sending email notifications to registered users</li>
-                <li>Displaying prominent notices on our platform</li>
-              </ul>
-              <p className="text-gray-700">
-                Your continued use of the platform after such changes constitutes acceptance of the updated Privacy Policy.
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Contact Information */}
-          <Card className="shadow-lg border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-emerald-600" />
-                Contact Us
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-700">
-                If you have questions about this Privacy Policy or our data practices, please contact us:
-              </p>
-              <div className="bg-gray-50 p-4 rounded-lg">
+            <CardContent>
+              <div className="space-y-4">
                 <p className="text-gray-700">
-                  <strong>Privacy Officer:</strong> privacy@t1daiplatform.com<br />
-                  <strong>Data Protection Officer:</strong> dpo@t1daiplatform.com<br />
-                  <strong>General Inquiries:</strong> info@t1daiplatform.com<br />
-                  <strong>Response Time:</strong> Within 48 hours
+                  If you have any questions about this privacy policy or how we handle your data, 
+                  please contact our privacy team:
+                </p>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-gray-700">
+                    <strong>Email:</strong> privacy@t1ddiscoveryhub.com<br />
+                    <strong>Address:</strong> Privacy Team, T1D Discovery Hub<br />
+                    <strong>Response Time:</strong> Within 48 hours
+                  </p>
+                </div>
+                
+                <p className="text-gray-700 text-sm">
+                  We regularly review and update this privacy policy to ensure it reflects our current practices 
+                  and complies with applicable laws and regulations.
                 </p>
               </div>
             </CardContent>
           </Card>
 
-          {/* Back to Platform */}
-          <div className="text-center">
-            <Button asChild size="lg">
-              <Link href="/">
-                Return to Platform
-              </Link>
-            </Button>
+          {/* Last Updated */}
+          <div className="text-center text-sm text-gray-500">
+            <p>Last updated: {new Date().toLocaleDateString()}</p>
+            <p>Version: 1.0</p>
           </div>
         </div>
       </div>

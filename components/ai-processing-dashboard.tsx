@@ -51,8 +51,9 @@ export function AIProcessingDashboard() {
         {
           id: "job-001",
           contentId: "content-123",
+          sourceId: "source-123",
           status: "processing",
-          startedAt: new Date().toISOString(),
+          startedAt: new Date(),
           pipeline: [
             { name: "language_detection", status: "completed", confidence: 0.95, duration: 120 },
             { name: "translation", status: "processing", confidence: 0.87 },
@@ -61,12 +62,14 @@ export function AIProcessingDashboard() {
             { name: "classification", status: "pending" },
             { name: "pattern_detection", status: "pending" },
           ],
+          results: {} as any,
         },
         {
           id: "job-002",
           contentId: "content-124",
+          sourceId: "source-124",
           status: "completed",
-          startedAt: new Date(Date.now() - 300000).toISOString(),
+          startedAt: new Date(Date.now() - 300000),
           pipeline: [
             { name: "language_detection", status: "completed", confidence: 0.98, duration: 95 },
             { name: "translation", status: "completed", confidence: 0.92, duration: 340 },
@@ -75,6 +78,7 @@ export function AIProcessingDashboard() {
             { name: "classification", status: "completed", confidence: 0.91, duration: 160 },
             { name: "pattern_detection", status: "completed", confidence: 0.85, duration: 280 },
           ],
+          results: {} as any,
         },
       ]
       setJobs(mockJobs)
@@ -94,7 +98,7 @@ export function AIProcessingDashboard() {
           type: "classification",
           status: "active",
           accuracy: 96.8,
-          lastTrained: new Date(Date.now() - 86400000 * 7).toISOString(),
+          lastTrained: new Date(Date.now() - 86400000 * 7),
           trainingData: {
             samples: 125000,
             languages: ["en", "es", "fr", "de", "it", "pt", "ru", "zh", "ja", "ko"],
@@ -103,10 +107,10 @@ export function AIProcessingDashboard() {
         {
           name: "Medical Entity Extractor",
           version: "1.8.3",
-          type: "ner",
+          type: "entity",
           status: "active",
           accuracy: 94.2,
-          lastTrained: new Date(Date.now() - 86400000 * 3).toISOString(),
+          lastTrained: new Date(Date.now() - 86400000 * 3),
           trainingData: {
             samples: 89000,
             categories: ["symptoms", "devices", "medications", "treatments", "activities"],

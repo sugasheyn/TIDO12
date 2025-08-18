@@ -18,6 +18,7 @@ export const authOptions: NextAuthOptions = {
       if (account && user) {
         token.accessToken = account.access_token
         token.userId = user.id
+        token.isNewUser = true
       }
       return token
     },
@@ -25,8 +26,18 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.userId as string
         session.accessToken = token.accessToken as string
+        session.user.isNewUser = token.isNewUser as boolean
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // Check if user has completed profile setup
+      if (url.startsWith(baseUrl)) {
+        // In production, you'd check the database here
+        // For demo, we'll redirect to profile setup for new users
+        return `${baseUrl}/auth/profile-setup`
+      }
+      return url
     },
   },
   session: {

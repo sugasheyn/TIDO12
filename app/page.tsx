@@ -26,6 +26,9 @@ import Link from "next/link"
 export default function HomePage() {
   const { sources, loading, error, lastUpdated, refreshData } = useLiveData()
 
+  // Safe access to sources array
+  const sourcesCount = Array.isArray(sources) ? sources.length : 0
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-8">
@@ -60,7 +63,7 @@ export default function HomePage() {
             </Badge>
             <Badge variant="secondary" className="px-6 py-3 text-base bg-card border-2 border-primary/20">
               <Users className="h-5 w-5 mr-3 text-primary" />
-              <span className="font-semibold">{sources.length > 0 ? `${sources.length.toLocaleString()}+ Sources` : '50K+ Sources'}</span>
+              <span className="font-semibold">{sourcesCount > 0 ? `${sourcesCount.toLocaleString()}+ Sources` : '50K+ Sources'}</span>
             </Badge>
             <Badge variant="secondary" className="px-6 py-3 text-base bg-card border-2 border-primary/20">
               <Brain className="h-5 w-5 mr-3 text-primary" />
@@ -145,9 +148,21 @@ export default function HomePage() {
               <TabsTrigger value="algorithms" className="text-xs font-medium">
                 ⚡ Methods
               </TabsTrigger>
-              <TabsTrigger value="public-data" className="text-xs font-medium">
-                🌍 Public Data
-              </TabsTrigger>
+                              <TabsTrigger value="ai-dashboard" className="text-xs font-medium">
+                  🧠 AI Dashboard
+                </TabsTrigger>
+                            <TabsTrigger value="correlation-dashboard" className="text-xs font-medium">
+              🔍 Correlation Dashboard
+            </TabsTrigger>
+                        <TabsTrigger value="rss-feed-dashboard" className="text-xs font-medium">
+              📡 RSS Feeds
+            </TabsTrigger>
+            <TabsTrigger value="ai-discovery" className="text-xs font-medium">
+              🧠 AI Discovery
+            </TabsTrigger>
+            <TabsTrigger value="public-data" className="text-xs font-medium">
+              🌍 Public Data
+            </TabsTrigger>
             </TabsList>
           </div>
 
@@ -240,6 +255,71 @@ export default function HomePage() {
               <Algorithms />
             </div>
           </TabsContent>
+
+          <TabsContent value="ai-dashboard" className="mt-8">
+            <div className="bg-card rounded-2xl p-6 shadow-xl border border-border/50">
+              <div className="text-center py-8">
+                <h3 className="text-xl font-semibold mb-4">🧠 Advanced AI Dashboard</h3>
+                <p className="text-gray-600 mb-6">
+                  Explore neural networks, predictive analytics, and adaptive learning systems analyzing diabetes data.
+                </p>
+                <Button asChild>
+                  <Link href="/ai-insights-dashboard">
+                    Launch AI Dashboard
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+                      <TabsContent value="correlation-dashboard" className="mt-8">
+              <div className="bg-card rounded-2xl p-6 shadow-xl border border-border/50">
+                <div className="text-center py-8">
+                  <h3 className="text-xl font-semibold mb-4">🔍 Advanced Correlation Detection</h3>
+                  <p className="text-gray-600 mb-6">
+                    Discover emerging symptoms, social media correlations, and scientific insights using advanced AI research concepts.
+                  </p>
+                  <Button asChild>
+                    <Link href="/advanced-correlation-dashboard">
+                      Launch Correlation Dashboard
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="rss-feed-dashboard" className="mt-8">
+              <div className="bg-card rounded-2xl p-6 shadow-xl border border-border/50">
+                <div className="text-center py-8">
+                  <h3 className="text-xl font-semibold mb-4">📡 RSS Feed Discovery</h3>
+                  <p className="text-gray-600 mb-6">
+                    Monitor and manage comprehensive Reddit RSS feeds for real-time diabetes information discovery from global communities.
+                  </p>
+                  <Button asChild>
+                    <Link href="/rss-feed-dashboard">
+                      Launch RSS Dashboard
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="ai-discovery" className="mt-8">
+              <div className="bg-card rounded-2xl p-6 shadow-xl border border-border/50">
+                <div className="text-center py-8">
+                  <h3 className="text-xl font-semibold mb-4">🧠 Advanced AI Discovery Engine</h3>
+                  <p className="text-gray-600 mb-6">
+                    Cutting-edge AI modules for extracting insights, discovering patterns, assessing reliability, 
+                    and generating hypotheses from diabetes community data and research.
+                  </p>
+                  <Button asChild>
+                    <Link href="/advanced-ai-discovery-dashboard">
+                      Launch AI Discovery Dashboard
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
 
           <TabsContent value="public-data" className="mt-8">
             <div className="bg-card rounded-2xl p-6 shadow-xl border border-border/50">
