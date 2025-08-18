@@ -94,7 +94,7 @@ export function Unaddressed() {
         description: pattern.description,
         feasibility: Math.floor(Math.random() * 40) + 60,
         expectedImpact: pattern.impact,
-        requiredResources: pattern.recommendations.slice(0, 3),
+        requiredResources: (pattern.recommendations && Array.isArray(pattern.recommendations)) ? pattern.recommendations.slice(0, 3) : ['Research funding', 'Clinical expertise', 'Data analysis'],
         timeline: ["6 months", "1 year", "18 months", "2 years"][i % 4],
         collaborators: ["Neurologists", "Endocrinologists", "Exercise Physiologists", "AI Researchers"][i % 4]
       }))
