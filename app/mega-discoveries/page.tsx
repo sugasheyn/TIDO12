@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Globe, Brain, AlertTriangle, Link, Languages, Activity, Target, Database, RefreshCw } from "lucide-react"
 import { useLiveData } from "@/hooks/use-live-data"
 import { Button } from "@/components/ui/button"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export default function MegaDiscoveriesPage() {
   const { sources, loading, error, lastUpdated, refreshData } = useLiveData()
@@ -74,7 +75,7 @@ export default function MegaDiscoveriesPage() {
             </Button>
             {lastUpdated && (
               <span className="text-sm text-muted-foreground">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                Last updated: {safeTimeFormat(lastUpdated)}
               </span>
             )}
             {error && (
@@ -108,7 +109,7 @@ export default function MegaDiscoveriesPage() {
           <Card className="border-l-4 border-l-blue-500">
             <CardContent className="p-6 text-center">
               <Database className="h-12 w-12 mx-auto mb-4 text-blue-600" />
-              <div className="text-3xl font-bold text-blue-600">{megaData.megaScale.totalSources.toLocaleString()}</div>
+              <div className="text-3xl font-bold text-blue-600">{safeNumberFormat(megaData.megaScale.totalSources)}</div>
               <div className="text-sm text-gray-600">Global Data Sources</div>
             </CardContent>
           </Card>
@@ -116,7 +117,7 @@ export default function MegaDiscoveriesPage() {
             <CardContent className="p-6 text-center">
               <Brain className="h-12 w-12 mx-auto mb-4 text-purple-600" />
               <div className="text-3xl font-bold text-purple-600">
-                {megaData.megaScale.algorithmCount.toLocaleString()}
+                {safeNumberFormat(megaData.megaScale.algorithmCount)}
               </div>
               <div className="text-sm text-gray-600">AI Algorithms</div>
             </CardContent>
@@ -167,7 +168,7 @@ export default function MegaDiscoveriesPage() {
                   <div>
                     <h4 className="font-semibold mb-3 flex items-center gap-2">
                       <Globe className="h-5 w-5" />
-                      Global Evidence ({discovery.dataSourcesCount.toLocaleString()} data points)
+                      Global Evidence ({safeNumberFormat(discovery.dataSourcesCount)} data points)
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {discovery.globalEvidence.map((evidence: any, idx: number) => (
@@ -183,7 +184,7 @@ export default function MegaDiscoveriesPage() {
                             <span className="text-sm font-medium text-green-600">{evidence.confidence}%</span>
                           </div>
                           <div className="text-sm text-gray-600">
-                            {evidence.evidenceCount.toLocaleString()} reports from {evidence.platform}
+                            {safeNumberFormat(evidence.evidenceCount)} reports from {evidence.platform}
                           </div>
                         </div>
                       ))}
@@ -205,7 +206,7 @@ export default function MegaDiscoveriesPage() {
                               <Badge variant="outline">{proof.language}</Badge>
                               {proof.verified && <Badge className="bg-green-100 text-green-800">Verified</Badge>}
                             </div>
-                            <div className="text-sm text-gray-600">{proof.engagement.toLocaleString()} engagements</div>
+                            <div className="text-sm text-gray-600">{safeNumberFormat(proof.engagement)} engagements</div>
                           </div>
                           <a
                             href={proof.url}
@@ -314,7 +315,7 @@ export default function MegaDiscoveriesPage() {
                       </div>
                       <div className="flex flex-col items-end space-y-2">
                         <Badge className="bg-orange-100 text-orange-800">{symptom.prevalence}% Prevalence</Badge>
-                        <Badge variant="outline">{symptom.dataSupport.toLocaleString()} reports</Badge>
+                        <Badge variant="outline">{safeNumberFormat(symptom.dataSupport)} reports</Badge>
                       </div>
                     </div>
                   </CardHeader>
@@ -370,9 +371,8 @@ export default function MegaDiscoveriesPage() {
                   <CardHeader>
                     <CardTitle className="capitalize">{category.replace(/([A-Z])/g, " $1").trim()}</CardTitle>
                     <CardDescription>
-                      {Object.values(sources)
-                        .reduce((a: any, b: any) => a + b, 0)
-                        .toLocaleString()}{" "}
+                      {safeNumberFormat(Object.values(sources)
+                        .reduce((a: any, b: any) => a + b, 0))}{" "}
                       sources
                     </CardDescription>
                   </CardHeader>
@@ -381,7 +381,7 @@ export default function MegaDiscoveriesPage() {
                       {Object.entries(sources).map(([platform, count]: [string, any]) => (
                         <div key={platform} className="flex justify-between items-center text-sm">
                           <span className="capitalize">{platform}</span>
-                          <span className="font-medium">{count.toLocaleString()}</span>
+                          <span className="font-medium">{safeNumberFormat(count)}</span>
                         </div>
                       ))}
                     </div>

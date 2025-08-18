@@ -236,7 +236,7 @@ export function AdvancedPatterns() {
                     <div>
                       <span className="text-sm font-medium">Last Detected: </span>
                       <span className="text-sm text-muted-foreground">
-                        {pattern.lastDetected.toLocaleDateString()}
+                        {safeDateOnlyFormat(pattern.lastDetected)}
                       </span>
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export function AdvancedPatterns() {
                     <div>
                       <span className="text-sm font-medium">Timestamp: </span>
                       <span className="text-sm text-muted-foreground">
-                        {analysis.timestamp.toLocaleDateString()}
+                        {safeDateOnlyFormat(analysis.timestamp)}
                       </span>
                     </div>
                   </div>

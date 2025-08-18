@@ -19,6 +19,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import type { AnalyticsMetrics } from "@/lib/analytics-types"
+import { safeNumberFormat } from "@/lib/utils"
 import { InteractiveCharts } from "./interactive-charts"
 import { GeographicVisualization } from "./geographic-visualization"
 import { RealTimeMetrics } from "./real-time-metrics"
@@ -79,7 +80,7 @@ export function AnalyticsDashboard() {
             Global T1D Intelligence Hub
           </h2>
           <p className="text-muted-foreground">
-            Real-time insights from {memoizedMetrics.totalSources.toLocaleString()} sources across{" "}
+            Real-time insights from {safeNumberFormat(memoizedMetrics.totalSources)} sources across{" "}
             {memoizedMetrics.countriesCovered} countries
           </p>
         </div>
@@ -114,7 +115,7 @@ export function AnalyticsDashboard() {
             <MessageSquare className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{memoizedMetrics.totalContent.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{safeNumberFormat(memoizedMetrics.totalContent)}</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-emerald-600">+{memoizedMetrics.dailyContent}</span> today
             </p>
@@ -127,9 +128,9 @@ export function AnalyticsDashboard() {
             <Activity className="h-4 w-4 text-emerald-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{memoizedMetrics.activeSources.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{safeNumberFormat(memoizedMetrics.activeSources)}</div>
             <p className="text-xs text-muted-foreground">
-              of {memoizedMetrics.totalSources.toLocaleString()} total sources
+              of {safeNumberFormat(memoizedMetrics.totalSources)} total sources
             </p>
           </CardContent>
         </Card>
@@ -184,7 +185,7 @@ export function AnalyticsDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{category.category}</span>
-                        <Badge variant="outline">{category.count.toLocaleString()}</Badge>
+                        <Badge variant="outline">{safeNumberFormat(category.count)}</Badge>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">{category.percentage}%</span>
@@ -225,7 +226,7 @@ export function AnalyticsDashboard() {
                       <div>
                         <h4 className="font-medium">{source.sourceName}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {source.count.toLocaleString()} items • {source.type.replace("_", " ")}
+                          {safeNumberFormat(source.count)} items • {source.type.replace("_", " ")}
                         </p>
                       </div>
                     </div>
@@ -261,7 +262,7 @@ export function AnalyticsDashboard() {
                       </div>
                       <h4 className="font-medium">{topic.topic}</h4>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{topic.mentions.toLocaleString()} mentions</span>
+                        <span>{safeNumberFormat(topic.mentions)} mentions</span>
                         <span>Past {topic.timeframe}</span>
                       </div>
                     </div>
@@ -327,7 +328,7 @@ export function AnalyticsDashboard() {
                 <div className="pt-4 border-t">
                   <div className="text-center">
                     <div className="text-2xl font-bold">
-                      {memoizedMetrics.sentimentDistribution.totalAnalyzed.toLocaleString()}
+                      {safeNumberFormat(memoizedMetrics.sentimentDistribution.totalAnalyzed)}
                     </div>
                     <div className="text-sm text-muted-foreground">Total items analyzed</div>
                   </div>
@@ -373,7 +374,7 @@ export function AnalyticsDashboard() {
                         <div>
                           <h4 className="font-medium">{device.device}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {device.mentions.toLocaleString()} mentions • {device.issues} issues reported
+                            {safeNumberFormat(device.mentions)} mentions • {device.issues} issues reported
                           </p>
                         </div>
                       </div>

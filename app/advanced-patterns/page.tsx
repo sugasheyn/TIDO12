@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Brain, Network, Zap, AlertTriangle, CheckCircle, Clock, Target, Layers, GitBranch, Cpu } from "lucide-react"
 import type { CrossDatasetPattern, MultiModalAnalysis } from "@/lib/advanced-pattern-types"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export default function AdvancedPatternsPage() {
   const [patterns, setPatterns] = useState<CrossDatasetPattern[]>([])
@@ -336,7 +337,7 @@ export default function AdvancedPatternsPage() {
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Volume:</span>
-                                  <span>{source.volume.toLocaleString()}</span>
+                                  <span>{safeNumberFormat(source.volume)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Velocity:</span>

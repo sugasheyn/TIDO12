@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@/components/ui/separator'import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
+
 import { 
   Activity, 
   Globe, 
@@ -100,7 +101,7 @@ export default function GlobalDiabetesHub() {
                   <Users className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockGlobalData.totalUsers.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{safeNumberFormat(mockGlobalData.totalUsers)}</div>
                   <p className="text-xs text-muted-foreground">
                     +12% from last month
                   </p>
@@ -113,7 +114,7 @@ export default function GlobalDiabetesHub() {
                   <BarChart3 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{mockGlobalData.totalDataPoints.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">{safeNumberFormat(mockGlobalData.totalDataPoints)}</div>
                   <p className="text-xs text-muted-foreground">
                     +8% from last month
                   </p>
@@ -264,7 +265,7 @@ export default function GlobalDiabetesHub() {
                   </div>
                   
                   <div className="text-xs text-gray-500 mt-2">
-                    Based on {mockGlobalData.totalUsers.toLocaleString()} user reports
+                    Based on {safeNumberFormat(mockGlobalData.totalUsers)} user reports
                   </div>
                   
                   <Button variant="outline" size="sm" className="w-full">
@@ -405,7 +406,7 @@ export default function GlobalDiabetesHub() {
                   </div>
                   
                   <div className="text-xs text-gray-500">
-                    Based on {mockGlobalData.totalUsers.toLocaleString()} community members
+                    Based on {safeNumberFormat(mockGlobalData.totalUsers)} community members
                   </div>
                   
                   <Button variant="outline" size="sm" className="w-full">

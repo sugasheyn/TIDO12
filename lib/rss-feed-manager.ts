@@ -29,16 +29,72 @@ export interface RSSFeedContent {
   sentiment: 'positive' | 'negative' | 'neutral';
 }
 
+export interface AutoRefreshStatus {
+  isActive: boolean;
+  intervalMinutes: number;
+  lastAutoRefresh: Date | null;
+  nextScheduledRefresh: Date | null;
+  totalAutoRefreshes: number;
+  lastError: string | null;
+}
+
 export class RSSFeedManager {
   private feeds: RSSFeed[] = [];
   private contentCache: Map<string, RSSFeedContent[]> = new Map();
   private fetchQueue: string[] = [];
   private isProcessing = false;
+  
+  // Auto-refresh functionality
+  private autoRefreshInterval: NodeJS.Timeout | null = null;
+  private autoRefreshStatus: AutoRefreshStatus = {
+    isActive: false,
+    intervalMinutes: 60, // Default: 1 hour
+    lastAutoRefresh: null,
+    nextScheduledRefresh: null,
+    totalAutoRefreshes: 0,
+    lastError: null
+  };
 
   constructor() {
     this.initializeFeeds();
   }
 
+  /**
+   * Clean up invalid or problematic RSS feeds
+   */
+  private cleanupInvalidFeeds(): void {
+    this.feeds = this.feeds.filter(feed => {
+      // Remove feeds with empty URLs
+      if (!feed.rss || feed.rss.trim() === '') {
+        console.warn(`Removing feed "${feed.name}" - empty RSS URL`);
+        return false;
+      }
+      
+      // Remove feeds with malformed URLs
+      try {
+        new URL(feed.rss);
+      } catch {
+        console.warn(`Removing feed "${feed.name}" - invalid RSS URL: ${feed.rss}`);
+        return false;
+      }
+      
+      // Remove feeds with empty JSON URLs (for Reddit feeds)
+      if (feed.json && feed.json.trim() !== '') {
+        try {
+          new URL(feed.json);
+        } catch {
+          console.warn(`Removing feed "${feed.name}" - invalid JSON URL: ${feed.json}`);
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }
+
+  /**
+   * Initialize feeds with validation
+   */
   private initializeFeeds(): void {
     // ===== HIGH PRIORITY - CORE DIABETES COMMUNITIES =====
     this.feeds.push(
@@ -77,202 +133,93 @@ export class RSSFeedManager {
       { name: 'Omnipod RSS', rss: 'https://www.omnipod.com/rss', json: '', category: 'technology', priority: 'high', status: 'active' },
       { name: 'Medtronic Diabetes Blog', rss: 'https://www.medtronicdiabetes.com/blog/feed', json: '', category: 'technology', priority: 'high', status: 'active' },
       { name: 'Tandem Diabetes RSS', rss: 'https://www.tandemdiabetes.com/rss', json: '', category: 'technology', priority: 'high', status: 'active' },
-      { name: 'Abbott News RSS', rss: 'https://www.abbott.com/rss/news.xml', json: '', category: 'technology', priority: 'high', status: 'active' },
-      { name: 'Insulet RSS', rss: 'https://www.insulet.com/rss', json: '', category: 'technology', priority: 'high', status: 'active' }
+      { name: 'Abbott News RSS', rss: 'https://www.abbott.com/rss/news.xml', json: '', category: 'technology', priority: 'high', status: 'active' }
     );
 
-    // ===== HIGH PRIORITY - MAJOR DIABETES ORGANIZATIONS =====
-    this.feeds.push(
-      { name: 'ADA Blog', rss: 'https://www.diabetes.org/rss/blog', json: '', category: 'diabetes', priority: 'high', status: 'active' },
-      { name: 'ADA Recipes', rss: 'https://www.diabetes.org/rss/recipes', json: '', category: 'diabetes', priority: 'high', status: 'active' },
-      { name: 'ADA Research', rss: 'https://www.diabetes.org/rss/research', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'JDRF News', rss: 'https://www.jdrf.org/feed', json: '', category: 'diabetes', priority: 'high', status: 'active' },
-      { name: 'Breakthrough T1D News', rss: 'https://www.breakthrought1d.org/news/feed', json: '', category: 'diabetes', priority: 'high', status: 'active' },
-      { name: 'Breakthrough T1D Research', rss: 'https://www.breakthrought1d.org/research/feed', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'Breakthrough T1D Community', rss: 'https://www.breakthrought1d.org/community/feed', json: '', category: 'diabetes', priority: 'high', status: 'active' }
-    );
+    // Clean up any invalid feeds
+    this.cleanupInvalidFeeds();
+    
+    console.log(`Initialized ${this.feeds.length} RSS feeds`);
+  }
 
-    // ===== HIGH PRIORITY - RESEARCH JOURNALS =====
-    this.feeds.push(
-      { name: 'ADA Diabetes Care', rss: 'https://diabetesjournals.org/rss/care.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'ADA Emerging Treatments', rss: 'https://diabetesjournals.org/rss/ettr.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'ADA Clinical Diabetes', rss: 'https://diabetesjournals.org/rss/clinical.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'ADA Diabetes Spectrum', rss: 'https://diabetesjournals.org/rss/spectrum.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'BMJ DRC Current Issue', rss: 'https://drc.bmj.com/rss/current.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'BMJ DRC Most Read', rss: 'https://drc.bmj.com/rss/mostread.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'BMJ DRC Most Cited', rss: 'https://drc.bmj.com/rss/mostcited.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'Endocrine Society RSS', rss: 'https://www.endocrine.org/rss', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'J Endocrine Soc', rss: 'https://academic.oup.com/jes/rss/current.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'Endocrine Reviews', rss: 'https://academic.oup.com/edrv/rss/current.xml', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'Lancet Diabetes Endocrinology', rss: 'https://www.thelancet.com/rssfeed/lancet/diabetes-endocrinology', json: '', category: 'research', priority: 'high', status: 'active' },
-      { name: 'Diabetes Research Clinical Practice', rss: 'https://www.sciencedirect.com/journal/diabetes-research-and-clinical-practice/rss', json: '', category: 'research', priority: 'high', status: 'active' }
-    );
+  // ===== AUTO-REFRESH FUNCTIONALITY =====
+  
+  /**
+   * Start automatic RSS feed refreshing at the specified interval
+   * @param intervalMinutes - Interval between refreshes (default: 60 minutes)
+   */
+  public startAutoRefresh(intervalMinutes: number = 60): void {
+    if (this.autoRefreshStatus.isActive) {
+      console.log('Auto-refresh is already active');
+      return;
+    }
 
-    // ===== MEDIUM PRIORITY - COMMUNITY FORUMS =====
-    this.feeds.push(
-      { name: 'Diabetes Forums T1D', rss: 'https://www.diabetesforums.com/forums/type-1-diabetes.7/index.rss', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Health Boards Diabetes', rss: 'https://www.healthboards.com/boards/external.php?type=RSS2&forumids=54', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes UK Forum T1D', rss: 'https://www.diabetes.co.uk/forum/category/type-1-diabetes.19/index.rss', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes UK Forum Pumps', rss: 'https://www.diabetes.co.uk/forum/category/insulin-pumps.70/index.rss', json: '', category: 'technology', priority: 'medium', status: 'active' },
-      { name: 'Diabetes UK Forum CGM', rss: 'https://www.diabetes.co.uk/forum/category/continuous-glucose-monitoring.71/index.rss', json: '', category: 'technology', priority: 'medium', status: 'active' },
-      { name: 'TuDiabetes Forum', rss: 'https://forum.tudiabetes.org/latest.rss', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Daily Forum', rss: 'https://www.diabetesdaily.com/forum/external.php?type=RSS2', json: '', category: 'diabetes', priority: 'medium', status: 'active' }
-    );
+    // Stop any existing interval
+    this.stopAutoRefresh();
 
-    // ===== MEDIUM PRIORITY - DIABETES BLOGS & NEWS =====
-    this.feeds.push(
-      { name: 'Diabetes UK Blog', rss: 'https://www.diabetes.co.uk/blog/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes UK T1D', rss: 'https://www.diabetes.co.uk/type1-diabetes/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Voice', rss: 'https://www.diabetesvoice.org/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Strong', rss: 'https://www.diabetesstrong.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Daily Grind', rss: 'https://www.diabetesdailygrind.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Wisdom', rss: 'https://www.diabeteswisdom.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Ed Net', rss: 'https://www.diabetesed.net/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Educator', rss: 'https://www.diabeteseducator.org/rss', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'T1D Exchange Magazine', rss: 'https://t1dexchange.org/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Stories', rss: 'https://diabetesstories.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes Daily T1D', rss: 'https://www.diabetesdaily.com/type1/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'T1D Living', rss: 'https://t1dliving.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'The Savvy Diabetic', rss: 'https://thesavvydiabetic.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Beyond Type 1', rss: 'https://beyondtype1.org/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diabetes UK News', rss: 'https://www.diabetes.org.uk/rss/news', json: '', category: 'diabetes', priority: 'medium', status: 'active' }
-    );
+    // Set the interval
+    this.autoRefreshStatus.intervalMinutes = intervalMinutes;
+    this.autoRefreshStatus.isActive = true;
+    this.autoRefreshStatus.nextScheduledRefresh = new Date(Date.now() + intervalMinutes * 60 * 1000);
 
-    // ===== MEDIUM PRIORITY - MEDICAL & RESEARCH =====
-    this.feeds.push(
-      { name: 'r/Endocrinology', rss: 'https://www.reddit.com/r/Endocrinology/.rss', json: 'https://www.reddit.com/r/Endocrinology.json', category: 'medical', priority: 'medium', status: 'active' },
-      { name: 'r/medicine', rss: 'https://www.reddit.com/r/medicine/.rss', json: 'https://www.reddit.com/r/medicine.json', category: 'medical', priority: 'medium', status: 'active' },
-      { name: 'r/AskDocs', rss: 'https://www.reddit.com/r/AskDocs/.rss', json: 'https://www.reddit.com/r/AskDocs.json', category: 'medical', priority: 'medium', status: 'active' },
-      { name: 'r/HealthIT', rss: 'https://www.reddit.com/r/HealthIT/.rss', json: 'https://www.reddit.com/r/HealthIT.json', category: 'technology', priority: 'medium', status: 'active' },
-      { name: 'r/MedicalDevices', rss: 'https://www.reddit.com/r/MedicalDevices/.rss', json: 'https://www.reddit.com/r/MedicalDevices.json', category: 'technology', priority: 'medium', status: 'active' },
-      { name: 'r/ClinicalResearch', rss: 'https://www.reddit.com/r/ClinicalResearch/.rss', json: 'https://www.reddit.com/r/ClinicalResearch.json', category: 'research', priority: 'medium', status: 'active' }
-    );
+    // Start the interval
+    this.autoRefreshInterval = setInterval(async () => {
+      await this.autoRefreshFeeds();
+    }, intervalMinutes * 60 * 1000);
 
-    // ===== MEDIUM PRIORITY - REGIONAL COMMUNITIES =====
-    this.feeds.push(
-      { name: 'r/diabetesUK', rss: 'https://www.reddit.com/r/diabetesUK/.rss', json: 'https://www.reddit.com/r/diabetesUK.json', category: 'regional', priority: 'medium', status: 'active' },
-      { name: 'r/diabetesCanada', rss: 'https://www.reddit.com/r/diabetesCanada/.rss', json: 'https://www.reddit.com/r/diabetesCanada.json', category: 'regional', priority: 'medium', status: 'active' },
-      { name: 'r/diabetes_Australia', rss: 'https://www.reddit.com/r/diabetes_Australia/.rss', json: 'https://www.reddit.com/r/diabetes_Australia.json', category: 'regional', priority: 'medium', status: 'active' },
-      { name: 'r/diabetesIndia', rss: 'https://www.reddit.com/r/diabetesIndia/.rss', json: 'https://www.reddit.com/r/diabetesIndia.json', category: 'regional', priority: 'medium', status: 'active' },
-      { name: 'r/diabetesPhilippines', rss: 'https://www.reddit.com/r/diabetesPhilippines/.rss', json: 'https://www.reddit.com/r/diabetesPhilippines.json', category: 'regional', priority: 'medium', status: 'active' },
-      { name: 'r/diabetesBrasil', rss: 'https://www.reddit.com/r/diabetesBrasil/.rss', json: 'https://www.reddit.com/r/diabetesBrasil.json', category: 'regional', priority: 'medium', status: 'active' },
-      { name: 'r/diabetesDE', rss: 'https://www.reddit.com/r/diabetesDE/.rss', json: 'https://www.reddit.com/r/diabetesDE.json', category: 'regional', priority: 'medium', status: 'active' }
-    );
+    // Perform initial refresh immediately
+    this.autoRefreshFeeds();
 
-    // ===== MEDIUM PRIORITY - HEALTH & WELLNESS =====
-    this.feeds.push(
-      { name: 'r/ChronicIllness', rss: 'https://www.reddit.com/r/ChronicIllness/.rss', json: 'https://www.reddit.com/r/ChronicIllness.json', category: 'medical', priority: 'medium', status: 'active' },
-      { name: 'r/Autoimmune', rss: 'https://www.reddit.com/r/Autoimmune/.rss', json: 'https://www.reddit.com/r/Autoimmune.json', category: 'medical', priority: 'medium', status: 'active' },
-      { name: 'r/HealthAnxiety', rss: 'https://www.reddit.com/r/HealthAnxiety/.rss', json: 'https://www.reddit.com/r/HealthAnxiety.json', category: 'medical', priority: 'medium', status: 'active' },
-      { name: 'r/nutrition', rss: 'https://www.reddit.com/r/nutrition/.rss', json: 'https://www.reddit.com/r/nutrition.json', category: 'lifestyle', priority: 'medium', status: 'active' },
-      { name: 'r/Supplements', rss: 'https://www.reddit.com/r/Supplements/.rss', json: 'https://www.reddit.com/r/Supplements.json', category: 'lifestyle', priority: 'medium', status: 'active' },
-      { name: 'r/fitness', rss: 'https://www.reddit.com/r/fitness/.rss', json: 'https://www.reddit.com/r/fitness.json', category: 'lifestyle', priority: 'medium', status: 'active' }
-    );
+    console.log(`Auto-refresh started: RSS feeds will refresh every ${intervalMinutes} minutes`);
+  }
 
-    // ===== LOW PRIORITY - GENERAL HEALTH & SCIENCE =====
-    this.feeds.push(
-      { name: 'r/science', rss: 'https://www.reddit.com/r/science/.rss', json: 'https://www.reddit.com/r/science.json', category: 'research', priority: 'low', status: 'active' },
-      { name: 'r/biology', rss: 'https://www.reddit.com/r/biology/.rss', json: 'https://www.reddit.com/r/biology.json', category: 'research', priority: 'low', status: 'active' },
-      { name: 'r/neuroscience', rss: 'https://www.reddit.com/r/neuroscience/.rss', json: 'https://www.reddit.com/r/neuroscience.json', category: 'research', priority: 'low', status: 'active' },
-      { name: 'r/genetics', rss: 'https://www.reddit.com/r/genetics/.rss', json: 'https://www.reddit.com/r/genetics.json', category: 'research', priority: 'low', status: 'active' },
-      { name: 'r/bioinformatics', rss: 'https://www.reddit.com/r/bioinformatics/.rss', json: 'https://www.reddit.com/r/bioinformatics.json', category: 'research', priority: 'low', status: 'active' },
-      { name: 'r/opendata', rss: 'https://www.reddit.com/r/opendata/.rss', json: 'https://www.reddit.com/r/opendata.json', category: 'research', priority: 'low', status: 'active' }
-    );
+  /**
+   * Stop automatic RSS feed refreshing
+   */
+  public stopAutoRefresh(): void {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
+      this.autoRefreshInterval = null;
+    }
+    
+    this.autoRefreshStatus.isActive = false;
+    this.autoRefreshStatus.nextScheduledRefresh = null;
+    
+    console.log('Auto-refresh stopped');
+  }
 
-    // ===== LOW PRIORITY - GOOGLE NEWS SEARCHES (ENGLISH) =====
-    this.feeds.push(
-      { name: 'Google News T1D US', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=en-US&gl=US&ceid=US:en', json: '', category: 'general', priority: 'low', status: 'active' },
-      { name: 'Google News Dexcom US', rss: 'https://news.google.com/rss/search?q=Dexcom&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Omnipod US', rss: 'https://news.google.com/rss/search?q=Omnipod&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Tandem US', rss: 'https://news.google.com/rss/search?q=Tandem%20t:slim&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Medtronic US', rss: 'https://news.google.com/rss/search?q=Medtronic%20insulin%20pump&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Libre 3 US', rss: 'https://news.google.com/rss/search?q=Libre%203&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Control-IQ US', rss: 'https://news.google.com/rss/search?q=Control-IQ&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News iLet US', rss: 'https://news.google.com/rss/search?q=iLet%20bionic%20pancreas&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' }
-    );
+  /**
+   * Get the current auto-refresh status
+   */
+  public getAutoRefreshStatus(): AutoRefreshStatus {
+    return { ...this.autoRefreshStatus };
+  }
 
-    // ===== LOW PRIORITY - GOOGLE NEWS SEARCHES (INTERNATIONAL) =====
-    this.feeds.push(
-      { name: 'Google News T1D Arabic', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=ar&gl=AE&ceid=AE:ar', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Hebrew', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=he&gl=IL&ceid=IL:he', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Thai', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=th&gl=TH&ceid=TH:th', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Vietnamese', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=vi&gl=VN&ceid=VN:vi', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Indonesian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=id&gl=ID&ceid=ID:id', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Malay', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=ms&gl=MY&ceid=MY:ms', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Persian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=fa&gl=IR&ceid=IR:fa', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Ukrainian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=uk&gl=UA&ceid=UA:uk', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Estonian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=et&gl=EE&ceid=EE:et', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Latvian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=lv&gl=LV&ceid=LV:lv', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Turkish', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=tr-TR&gl=TR&ceid=TR:tr', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Greek', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=el-GR&gl=GR&ceid=GR:el', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Czech', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=cs-CZ&gl=CZ&ceid=CZ:cs', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Hungarian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=hu-HU&gl=HU&ceid=HU:hu', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Romanian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=ro-RO&gl=RO&ceid=RO:ro', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Slovak', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=sk-SK&gl=SK&ceid=SK:sk', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Slovenian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=sl-SI&gl=SI&ceid=SI:sl', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Croatian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=hr-HR&gl=HR&ceid=HR:hr', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Bulgarian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=bg-BG&gl=BG&ceid=BG:bg', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Lithuanian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=lt-LT&gl=LT&ceid=LT:lt', json: '', category: 'regional', priority: 'low', status: 'active' }
-    );
-
-    // ===== LOW PRIORITY - GOOGLE NEWS SEARCHES (EUROPEAN LANGUAGES) =====
-    this.feeds.push(
-      { name: 'Google News T1D Spanish LatAm', rss: 'https://news.google.com/rss/search?q=%22diabetes%20tipo%201%22&hl=es-419&gl=MX&ceid=MX:es-419', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Spanish Spain', rss: 'https://news.google.com/rss/search?q=%22diabetes%20tipo%201%22&hl=es-ES&gl=ES&ceid=ES:es', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D French', rss: 'https://news.google.com/rss/search?q=%22diab%C3%A8te%20de%20type%201%22&hl=fr-FR&gl=FR&ceid=FR:fr', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D German', rss: 'https://news.google.com/rss/search?q=%22Typ-1-Diabetes%22&hl=de-DE&gl=DE&ceid=DE:de', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Portuguese Brazil', rss: 'https://news.google.com/rss/search?q=%22diabetes%20tipo%201%22&hl=pt-BR&gl=BR&ceid=BR:pt-419', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Portuguese Portugal', rss: 'https://news.google.com/rss/search?q=%22diabetes%20tipo%201%22&hl=pt-PT&gl=PT&ceid=PT:pt-PT', json: '', category: 'regional', priority: 'low', status: 'active' }
-    );
-
-    // ===== ADDITIONAL MANUFACTURER & TECHNOLOGY FEEDS =====
-    this.feeds.push(
-      { name: 'Google News Dexcom US', rss: 'https://news.google.com/rss/search?q=Dexcom&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Omnipod US', rss: 'https://news.google.com/rss/search?q=Omnipod&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Tandem t:slim US', rss: 'https://news.google.com/rss/search?q=Tandem%20t:slim&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Medtronic Insulin Pump US', rss: 'https://news.google.com/rss/search?q=Medtronic%20insulin%20pump&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Libre 3 US', rss: 'https://news.google.com/rss/search?q=Libre%203&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News Control-IQ US', rss: 'https://news.google.com/rss/search?q=Control-IQ&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' },
-      { name: 'Google News iLet Bionic Pancreas US', rss: 'https://news.google.com/rss/search?q=iLet%20bionic%20pancreas&hl=en-US&gl=US&ceid=US:en', json: '', category: 'technology', priority: 'low', status: 'active' }
-    );
-
-    // ===== ADDITIONAL DIABETES BLOGS & NEWS SOURCES =====
-    this.feeds.push(
-      { name: 'Insulin Nation', rss: 'https://insulinnation.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'ASweetLife', rss: 'https://asweetlife.org/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'MyGlu', rss: 'https://myglu.org/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Diatribe', rss: 'https://diatribe.org/rss.xml', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Children With Diabetes', rss: 'https://www.childrenwithdiabetes.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'DiabetesMine', rss: 'https://www.healthline.com/diabetesmine/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' },
-      { name: 'Sugar Surfing', rss: 'https://sugarsurfing.com/feed', json: '', category: 'diabetes', priority: 'medium', status: 'active' }
-    );
-
-    // ===== ADDITIONAL RESEARCH & CLINICAL JOURNALS =====
-    this.feeds.push(
-      { name: 'Diabetologia Latest Articles', rss: 'https://link.springer.com/search.rss?facet-content-type=Article&facet-journal-id=125', json: '', category: 'research', priority: 'medium', status: 'active' },
-      { name: 'Frontiers in Endocrinology Diabetes', rss: 'https://www.frontiersin.org/journals/endocrinology/rss', json: '', category: 'research', priority: 'medium', status: 'active' },
-      { name: 'Nature Reviews Endocrinology', rss: 'https://www.nature.com/nrendo.rss', json: '', category: 'research', priority: 'medium', status: 'active' }
-    );
-
-    // ===== ADDITIONAL REGIONAL & LANGUAGE FEEDS =====
-    this.feeds.push(
-      { name: 'Google News T1D Turkish', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=tr-TR&gl=TR&ceid=TR:tr', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Greek', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=el-GR&gl=GR&ceid=GR:el', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Czech', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=cs-CZ&gl=CZ&ceid=CZ:cs', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Hungarian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=hu-HU&gl=HU&ceid=HU:hu', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Romanian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=ro-RO&gl=RO&ceid=RO:ro', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Slovak', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=sk-SK&gl=SK&ceid=SK:sk', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Slovenian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=sl-SI&gl=SI&ceid=SI:sl', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Croatian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=hr-HR&gl=HR&ceid=HR:hr', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Bulgarian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=bg-BG&gl=BG&ceid=BG:bg', json: '', category: 'regional', priority: 'low', status: 'active' },
-      { name: 'Google News T1D Lithuanian', rss: 'https://news.google.com/rss/search?q=%22type%201%20diabetes%22&hl=lt-LT&gl=LT&ceid=LT:lt', json: '', category: 'regional', priority: 'low', status: 'active' }
-    );
-
-    // Initialize all feeds as active
-    this.feeds.forEach(feed => {
-      feed.status = 'active';
-      feed.lastFetched = undefined;
-    });
+  /**
+   * Private method to handle automatic feed refreshing
+   */
+  private async autoRefreshFeeds(): Promise<void> {
+    try {
+      console.log(`🔄 Auto-refreshing RSS feeds at ${new Date().toLocaleString()}`);
+      
+      const startTime = Date.now();
+      const content = await this.fetchAllFeeds();
+      const endTime = Date.now();
+      
+      // Update status
+      this.autoRefreshStatus.lastAutoRefresh = new Date();
+      this.autoRefreshStatus.totalAutoRefreshes++;
+      this.autoRefreshStatus.lastError = null;
+      this.autoRefreshStatus.nextScheduledRefresh = new Date(Date.now() + this.autoRefreshStatus.intervalMinutes * 60 * 1000);
+      
+      console.log(`✅ Auto-refresh completed: ${content.length} items fetched in ${endTime - startTime}ms`);
+      console.log(`📅 Next auto-refresh scheduled for: ${this.autoRefreshStatus.nextScheduledRefresh.toLocaleString()}`);
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      this.autoRefreshStatus.lastError = errorMessage;
+      console.error(`❌ Auto-refresh failed: ${errorMessage}`);
+    }
   }
 
   public async fetchAllFeeds(): Promise<RSSFeedContent[]> {
@@ -286,7 +233,7 @@ export class RSSFeedManager {
     // Fetch high priority feeds first
     for (const feed of highPriority) {
       try {
-        const content = await this.fetchFeed(feed);
+        const content = await this.fetchFeedWithRetry(feed);
         if (content.length > 0) {
           allContent.push(...content);
           this.contentCache.set(feed.name, content);
@@ -302,7 +249,7 @@ export class RSSFeedManager {
     // Fetch medium priority feeds
     for (const feed of mediumPriority) {
       try {
-        const content = await this.fetchFeed(feed);
+        const content = await this.fetchFeedWithRetry(feed);
         if (content.length > 0) {
           allContent.push(...content);
           this.contentCache.set(feed.name, content);
@@ -318,7 +265,7 @@ export class RSSFeedManager {
     // Fetch low priority feeds (if time permits)
     for (const feed of lowPriority) {
       try {
-        const content = await this.fetchFeed(feed);
+        const content = await this.fetchFeedWithRetry(feed);
         if (content.length > 0) {
           allContent.push(...content);
           this.contentCache.set(feed.name, content);
@@ -334,35 +281,51 @@ export class RSSFeedManager {
     return allContent;
   }
 
+  /**
+   * Fetch content from a specific RSS feed
+   */
   private async fetchFeed(feed: RSSFeed): Promise<RSSFeedContent[]> {
     try {
-      // Try JSON API first (more reliable)
-      const response = await fetch(feed.json);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return this.parseRedditJSON(data, feed);
-    } catch (error) {
-      console.warn(`JSON fetch failed for ${feed.name}, trying RSS:`, error);
-      
-      // Fallback to RSS if JSON fails
-      try {
-        const response = await fetch(feed.rss);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const text = await response.text();
-        return this.parseRSSFeed(text, feed);
-      } catch (rssError) {
-        console.error(`RSS fetch also failed for ${feed.name}:`, rssError);
+      // Validate RSS URL before attempting to fetch
+      if (!feed.rss || feed.rss.trim() === '') {
+        console.warn(`Skipping feed "${feed.name}" - empty or invalid RSS URL`);
         return [];
       }
+
+      // Try JSON first (for Reddit feeds)
+      if (feed.json && feed.json.trim() !== '') {
+        try {
+          const response = await fetch(feed.json);
+          if (response.ok) {
+            const data = await response.json();
+            return this.parseRedditJSON(data, feed);
+          }
+        } catch (error) {
+          console.log(`JSON fetch failed for ${feed.name}, trying RSS:`, error);
+        }
+      }
+
+      // Try RSS/XML
+      try {
+        const response = await fetch(feed.rss);
+        if (response.ok) {
+          const text = await response.text();
+          return this.parseRSSFeed(text, feed);
+        }
+      } catch (error) {
+        console.error(`RSS fetch failed for ${feed.name}:`, error);
+      }
+
+      return [];
+    } catch (error) {
+      console.error(`Error fetching feed ${feed.name}:`, error);
+      return [];
     }
   }
 
+  /**
+   * Parse Reddit JSON API response
+   */
   private parseRedditJSON(data: any, feed: RSSFeed): RSSFeedContent[] {
     const posts: RSSFeedContent[] = [];
     
@@ -394,83 +357,197 @@ export class RSSFeedManager {
     return posts;
   }
 
+  /**
+   * Parse RSS/XML feed content
+   */
   private parseRSSFeed(xmlText: string, feed: RSSFeed): RSSFeedContent[] {
-    const posts: RSSFeedContent[] = [];
-    
     try {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-      const items = xmlDoc.querySelectorAll('item');
+      // Use a simple regex-based parser for Node.js compatibility
+      const items: RSSFeedContent[] = [];
       
-      for (const item of items) {
-        const title = item.querySelector('title')?.textContent || '';
-        const content = item.querySelector('description')?.textContent || title;
-        const author = item.querySelector('author')?.textContent || 'anonymous';
-        const pubDate = item.querySelector('pubDate')?.textContent || '';
-        const link = item.querySelector('link')?.textContent || '';
-        
-        if (title && content) {
-          posts.push({
-            id: this.generateId(title + content),
-            title,
-            content,
-            author,
-            timestamp: new Date(pubDate || Date.now()),
-            source: feed.name,
-            category: feed.category,
-            url: link,
-            keywords: this.extractKeywords(title + ' ' + content),
-            sentiment: this.analyzeSentiment(title + ' ' + content)
-          });
+      // Extract items using regex patterns
+      const itemMatches = xmlText.match(/<item[^>]*>([\s\S]*?)<\/item>/gi);
+      
+      if (!itemMatches) {
+        // Try alternative RSS format
+        const entryMatches = xmlText.match(/<entry[^>]*>([\s\S]*?)<\/entry>/gi);
+        if (entryMatches) {
+          return this.parseAtomFeed(xmlText, feed);
+        }
+        return [];
+      }
+
+      for (const itemMatch of itemMatches.slice(0, 10)) { // Limit to 10 items
+        try {
+          const titleMatch = itemMatch.match(/<title[^>]*>([^<]*)<\/title>/i);
+          const linkMatch = itemMatch.match(/<link[^>]*>([^<]*)<\/link>/i);
+          const descriptionMatch = itemMatch.match(/<description[^>]*>([^<]*)<\/description>/i);
+          const pubDateMatch = itemMatch.match(/<pubDate[^>]*>([^<]*)<\/pubDate>/i);
+          const guidMatch = itemMatch.match(/<guid[^>]*>([^<]*)<\/guid>/i);
+
+          if (titleMatch && titleMatch[1]) {
+            const title = titleMatch[1].trim();
+            const link = linkMatch ? linkMatch[1].trim() : '';
+            const description = descriptionMatch ? descriptionMatch[1].trim() : '';
+            
+            // Safe date parsing
+            let timestamp: Date;
+            try {
+              if (pubDateMatch && pubDateMatch[1]) {
+                timestamp = new Date(pubDateMatch[1]);
+                if (isNaN(timestamp.getTime())) {
+                  timestamp = new Date();
+                }
+              } else {
+                timestamp = new Date();
+              }
+            } catch (dateError) {
+              timestamp = new Date();
+            }
+
+            items.push({
+              id: guidMatch ? guidMatch[1].trim() : `rss_${Date.now()}_${Math.random()}`,
+              title: title,
+              content: description,
+              author: 'RSS Feed',
+              timestamp: timestamp,
+              source: feed.name,
+              category: feed.category,
+              url: link,
+              engagement: {
+                upvotes: 0,
+                comments: 0,
+                score: 0
+              },
+              keywords: this.extractKeywords(title + ' ' + description),
+              sentiment: this.analyzeSentiment(title + ' ' + description)
+            });
+          }
+        } catch (itemError) {
+          console.warn(`Error parsing RSS item in ${feed.name}:`, itemError);
+          continue;
         }
       }
+
+      return items;
     } catch (error) {
       console.error(`Error parsing RSS for ${feed.name}:`, error);
+      return [];
     }
-
-    return posts;
   }
 
+  /**
+   * Parse Atom feed format
+   */
+  private parseAtomFeed(xmlText: string, feed: RSSFeed): RSSFeedContent[] {
+    try {
+      const items: RSSFeedContent[] = [];
+      
+      // Extract entries using regex patterns
+      const entryMatches = xmlText.match(/<entry[^>]*>([\s\S]*?)<\/entry>/gi);
+      
+      if (!entryMatches) return [];
+
+      for (const entryMatch of entryMatches.slice(0, 10)) {
+        try {
+          const titleMatch = entryMatch.match(/<title[^>]*>([^<]*)<\/title>/i);
+          const linkMatch = entryMatch.match(/<link[^>]*href="([^"]*)"/i);
+          const summaryMatch = entryMatch.match(/<summary[^>]*>([^<]*)<\/summary>/i);
+          const updatedMatch = entryMatch.match(/<updated[^>]*>([^<]*)<\/updated>/i);
+          const idMatch = entryMatch.match(/<id[^>]*>([^<]*)<\/id>/i);
+
+          if (titleMatch && titleMatch[1]) {
+            const title = titleMatch[1].trim();
+            const link = linkMatch ? linkMatch[1].trim() : '';
+            const summary = summaryMatch ? summaryMatch[1].trim() : '';
+            
+            // Safe date parsing
+            let timestamp: Date;
+            try {
+              if (updatedMatch && updatedMatch[1]) {
+                timestamp = new Date(updatedMatch[1]);
+                if (isNaN(timestamp.getTime())) {
+                  timestamp = new Date();
+                }
+              } else {
+                timestamp = new Date();
+              }
+            } catch (dateError) {
+              timestamp = new Date();
+            }
+
+            items.push({
+              id: idMatch ? idMatch[1].trim() : `atom_${Date.now()}_${Math.random()}`,
+              title: title,
+              content: summary,
+              author: 'Atom Feed',
+              timestamp: timestamp,
+              source: feed.name,
+              category: feed.category,
+              url: link,
+              engagement: {
+                upvotes: 0,
+                comments: 0,
+                score: 0
+              },
+              keywords: this.extractKeywords(title + ' ' + summary),
+              sentiment: this.analyzeSentiment(title + ' ' + summary)
+            });
+          }
+        } catch (itemError) {
+          console.warn(`Error parsing Atom entry in ${feed.name}:`, itemError);
+          continue;
+        }
+      }
+
+      return items;
+    } catch (error) {
+      console.error(`Error parsing Atom feed for ${feed.name}:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Extract keywords from text content
+   */
   private extractKeywords(text: string): string[] {
-    const words = text.toLowerCase()
-      .replace(/[^\w\s]/g, '')
-      .split(/\s+/)
-      .filter(word => word.length > 3);
+    if (!text) return [];
     
-    const keywordCounts = new Map<string, number>();
-    words.forEach(word => {
-      keywordCounts.set(word, (keywordCounts.get(word) || 0) + 1);
-    });
+    // Simple keyword extraction - in production, you'd use NLP libraries
+    const commonKeywords = [
+      'diabetes', 'glucose', 'insulin', 'cgm', 'pump', 'monitoring',
+      'type 1', 'type 2', 'blood sugar', 'a1c', 'keto', 'low carb',
+      'exercise', 'diet', 'medication', 'technology', 'research'
+    ];
     
-    return Array.from(keywordCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([word]) => word);
+    const textLower = text.toLowerCase();
+    return commonKeywords.filter(keyword => textLower.includes(keyword));
   }
 
+  /**
+   * Analyze sentiment of text content
+   */
   private analyzeSentiment(text: string): 'positive' | 'negative' | 'neutral' {
-    const positiveWords = ['help', 'improve', 'better', 'good', 'great', 'amazing', 'wonderful', 'effective', 'success', 'positive'];
-    const negativeWords = ['problem', 'issue', 'bad', 'terrible', 'awful', 'difficult', 'struggle', 'pain', 'negative', 'worse'];
+    if (!text) return 'neutral';
     
-    const lowerText = text.toLowerCase();
-    let positiveCount = 0;
-    let negativeCount = 0;
+    // Simple sentiment analysis - in production, you'd use NLP libraries
+    const positiveWords = ['good', 'great', 'excellent', 'amazing', 'helpful', 'improved', 'better', 'success', 'happy'];
+    const negativeWords = ['bad', 'terrible', 'awful', 'problem', 'issue', 'difficult', 'pain', 'sad', 'angry'];
     
-    positiveWords.forEach(word => {
-      if (lowerText.includes(word)) positiveCount++;
-    });
-    
-    negativeWords.forEach(word => {
-      if (lowerText.includes(word)) negativeCount++;
-    });
+    const textLower = text.toLowerCase();
+    const positiveCount = positiveWords.filter(word => textLower.includes(word)).length;
+    const negativeCount = negativeWords.filter(word => textLower.includes(word)).length;
     
     if (positiveCount > negativeCount) return 'positive';
     if (negativeCount > positiveCount) return 'negative';
     return 'neutral';
   }
 
+  /**
+   * Generate a unique ID for content
+   */
   private generateId(text: string): string {
-    return btoa(text).replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+    return `rss_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   public getFeedsByCategory(category: string): RSSFeed[] {
@@ -499,12 +576,27 @@ export class RSSFeedManager {
     return this.contentCache.get(feedName) || [];
   }
 
+  /**
+   * Get all cached content from all feeds
+   */
   public getAllCachedContent(): RSSFeedContent[] {
     const allContent: RSSFeedContent[] = [];
-    for (const content of this.contentCache.values()) {
-      allContent.push(...content);
+    
+    for (const [feedName, content] of this.contentCache.entries()) {
+      if (content && Array.isArray(content)) {
+        allContent.push(...content);
+      }
     }
-    return allContent;
+    
+    // Sort by timestamp (newest first)
+    return allContent.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }
+
+  /**
+   * Get cached content for a specific feed
+   */
+  public getFeedContent(feedName: string): RSSFeedContent[] {
+    return this.contentCache.get(feedName) || [];
   }
 
   public clearCache(): void {
@@ -525,5 +617,299 @@ export class RSSFeedManager {
     }
 
     return content;
+  }
+
+  /**
+   * Get comprehensive status including auto-refresh information
+   */
+  public getComprehensiveStatus(): {
+    feeds: { total: number; active: number; error: number; lastUpdated: Date | null };
+    autoRefresh: AutoRefreshStatus;
+    cache: { totalFeeds: number; totalItems: number };
+  } {
+    const feedStatus = this.getFeedStatus();
+    const autoRefreshStatus = this.getAutoRefreshStatus();
+    
+    // Calculate cache statistics
+    let totalItems = 0;
+    for (const content of this.contentCache.values()) {
+      totalItems += content.length;
+    }
+
+    return {
+      feeds: feedStatus,
+      autoRefresh: autoRefreshStatus,
+      cache: {
+        totalFeeds: this.contentCache.size,
+        totalItems
+      }
+    };
+  }
+
+  /**
+   * Search cached content by keywords
+   */
+  public searchContent(query: string, category?: string): RSSFeedContent[] {
+    const allContent = this.getAllCachedContent();
+    const queryLower = query.toLowerCase();
+    
+    return allContent.filter(item => {
+      // Filter by category if specified
+      if (category && item.category !== category) {
+        return false;
+      }
+      
+      // Search in title, content, and keywords
+      const searchableText = [
+        item.title,
+        item.content,
+        ...item.keywords
+      ].join(' ').toLowerCase();
+      
+      return searchableText.includes(queryLower);
+    });
+  }
+
+  /**
+   * Get content by category with optional limit
+   */
+  public getContentByCategory(category: string, limit?: number): RSSFeedContent[] {
+    const allContent = this.getAllCachedContent();
+    const filtered = allContent.filter(item => item.category === category);
+    
+    if (limit) {
+      return filtered.slice(0, limit);
+    }
+    
+    return filtered;
+  }
+
+  /**
+   * Get trending topics from cached content
+   */
+  public getTrendingTopics(limit: number = 10): { topic: string; count: number; sentiment: 'positive' | 'negative' | 'neutral' }[] {
+    const allContent = this.getAllCachedContent();
+    const topicCounts = new Map<string, { count: number; positive: number; negative: number; neutral: number }>();
+    
+    allContent.forEach(item => {
+      item.keywords.forEach(keyword => {
+        const topic = keyword.toLowerCase();
+        const current = topicCounts.get(topic) || { count: 0, positive: 0, negative: 0, neutral: 0 };
+        
+        current.count++;
+        if (item.sentiment === 'positive') current.positive++;
+        else if (item.sentiment === 'negative') current.negative++;
+        else current.neutral++;
+        
+        topicCounts.set(topic, current);
+      });
+    });
+    
+    // Convert to array and sort by count
+    const topics = Array.from(topicCounts.entries()).map(([topic, stats]) => {
+      let sentiment: 'positive' | 'negative' | 'neutral' = 'neutral';
+      if (stats.positive > stats.negative && stats.positive > stats.neutral) sentiment = 'positive';
+      else if (stats.negative > stats.positive && stats.negative > stats.neutral) sentiment = 'negative';
+      
+      return {
+        topic,
+        count: stats.count,
+        sentiment
+      };
+    });
+    
+    return topics
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+  }
+
+  /**
+   * Get content statistics for analytics
+   */
+  public getContentStats(): {
+    totalItems: number;
+    byCategory: Record<string, number>;
+    bySource: Record<string, number>;
+    bySentiment: Record<string, number>;
+    recentActivity: { date: string; count: number }[];
+  } {
+    const allContent = this.getAllCachedContent();
+    
+    // Category breakdown
+    const byCategory: Record<string, number> = {};
+    const bySource: Record<string, number> = {};
+    const bySentiment: Record<string, number> = {};
+    
+    allContent.forEach(item => {
+      byCategory[item.category] = (byCategory[item.category] || 0) + 1;
+      bySource[item.source] = (bySource[item.source] || 0) + 1;
+      bySentiment[item.sentiment] = (bySentiment[item.sentiment] || 0) + 1;
+    });
+    
+    // Recent activity (last 7 days)
+    const recentActivity: { date: string; count: number }[] = [];
+    const now = new Date();
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dateStr = date.toISOString().split('T')[0];
+      const count = allContent.filter(item => 
+        item.timestamp.toISOString().split('T')[0] === dateStr
+      ).length;
+      
+      recentActivity.push({ date: dateStr, count });
+    }
+    
+    return {
+      totalItems: allContent.length,
+      byCategory,
+      bySource,
+      bySentiment,
+      recentActivity
+    };
+  }
+
+  /**
+   * Validate and test RSS feed URLs
+   */
+  public async validateFeed(feed: RSSFeed): Promise<{ isValid: boolean; error?: string; testContent?: RSSFeedContent[] }> {
+    try {
+      if (!feed.rss || feed.rss.trim() === '') {
+        return { isValid: false, error: 'Empty RSS URL' };
+      }
+      
+      // Test URL format
+      try {
+        new URL(feed.rss);
+      } catch {
+        return { isValid: false, error: 'Invalid URL format' };
+      }
+      
+      // Test fetch
+      const response = await fetch(feed.rss);
+      if (!response.ok) {
+        return { isValid: false, error: `HTTP ${response.status}: ${response.statusText}` };
+      }
+      
+      // Test parsing
+      const text = await response.text();
+      const testContent = this.parseRSSFeed(text, feed);
+      
+      if (testContent.length === 0) {
+        return { isValid: false, error: 'No content could be parsed from feed' };
+      }
+      
+      return { isValid: true, testContent };
+    } catch (error) {
+      return { isValid: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  /**
+   * Get comprehensive feed health status
+   */
+  public getFeedHealthStatus(): {
+    totalFeeds: number;
+    healthyFeeds: number;
+    problematicFeeds: number;
+    lastRefresh: Date | null;
+    errorRate: number;
+    recommendations: string[];
+  } {
+    const totalFeeds = this.feeds.length;
+    const healthyFeeds = this.feeds.filter(feed => feed.status === 'active').length;
+    const problematicFeeds = this.feeds.filter(feed => feed.status === 'error').length;
+    
+    // Calculate error rate
+    const errorRate = totalFeeds > 0 ? (problematicFeeds / totalFeeds) * 100 : 0;
+    
+    // Generate recommendations
+    const recommendations: string[] = [];
+    if (errorRate > 20) {
+      recommendations.push('High error rate detected. Consider reviewing problematic RSS feeds.');
+    }
+    if (problematicFeeds > 0) {
+      recommendations.push(`${problematicFeeds} feeds have errors. Check feed URLs and accessibility.`);
+    }
+    if (this.autoRefreshStatus.lastError) {
+      recommendations.push('Auto-refresh encountered errors. Check network connectivity and feed availability.');
+    }
+    
+    return {
+      totalFeeds,
+      healthyFeeds,
+      problematicFeeds,
+      lastRefresh: this.autoRefreshStatus.lastAutoRefresh,
+      errorRate: Math.round(errorRate * 100) / 100,
+      recommendations
+    };
+  }
+
+  /**
+   * Remove duplicate content based on title similarity
+   */
+  private removeDuplicateContent(content: RSSFeedContent[]): RSSFeedContent[] {
+    const seen = new Set<string>();
+    const uniqueContent: RSSFeedContent[] = [];
+    
+    for (const item of content) {
+      // Create a normalized key for deduplication
+      const normalizedTitle = this.normalizeText(item.title);
+      const normalizedContent = this.normalizeText(item.content);
+      const key = `${normalizedTitle}_${normalizedContent.substring(0, 100)}`;
+      
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueContent.push(item);
+      }
+    }
+    
+    return uniqueContent;
+  }
+
+  /**
+   * Normalize text for better deduplication
+   */
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+  }
+
+  /**
+   * Enhanced content fetching with better error handling
+   */
+  private async fetchFeedWithRetry(feed: RSSFeed, maxRetries: number = 3): Promise<RSSFeedContent[]> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const content = await this.fetchFeed(feed);
+        
+        // Update feed status on success
+        if (content.length > 0) {
+          feed.status = 'active';
+          feed.lastFetched = new Date();
+        }
+        
+        return content;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.warn(`Attempt ${attempt} failed for feed "${feed.name}":`, lastError.message);
+        
+        if (attempt < maxRetries) {
+          // Exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempt - 1)));
+        }
+      }
+    }
+    
+    // Mark feed as problematic after all retries fail
+    feed.status = 'error';
+    console.error(`All attempts failed for feed "${feed.name}":`, lastError);
+    
+    return [];
   }
 }

@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Database, Users, TrendingUp, Activity, Shield, Globe } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface ClinicalStudy {
   id: string
@@ -167,18 +168,18 @@ export function JaebIntegration() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Enrollment Progress</span>
                       <span className="text-sm text-muted-foreground">
-                        {study.participants.toLocaleString()}/{study.targetEnrollment.toLocaleString()}
+                        {safeNumberFormat(study.participants)}/{safeNumberFormat(study.targetEnrollment)}
                       </span>
                     </div>
                     <Progress value={getEnrollmentProgress(study.participants, study.targetEnrollment)} className="h-2" />
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
                         <span className="font-medium">Start Date: </span>
-                        <span className="text-muted-foreground">{study.startDate.toLocaleDateString()}</span>
+                        <span className="text-muted-foreground">{safeDateOnlyFormat(study.startDate)}</span>
                       </div>
                       <div>
                         <span className="font-medium">End Date: </span>
-                        <span className="text-muted-foreground">{study.endDate.toLocaleDateString()}</span>
+                        <span className="text-muted-foreground">{safeDateOnlyFormat(study.endDate)}</span>
                       </div>
                     </div>
                     <div>
@@ -223,7 +224,7 @@ export function JaebIntegration() {
                     <div>
                       <span className="text-sm font-medium">Last Updated: </span>
                       <span className="text-sm text-muted-foreground">
-                        {insight.lastUpdated.toLocaleDateString()}
+                        {safeDateOnlyFormat(insight.lastUpdated)}
                       </span>
                     </div>
                   </div>

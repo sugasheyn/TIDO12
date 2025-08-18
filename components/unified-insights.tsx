@@ -207,7 +207,7 @@ export function UnifiedInsights() {
                     <div>
                       <span className="text-sm font-medium">Last Updated: </span>
                       <span className="text-sm text-muted-foreground">
-                        {insight.lastUpdated.toLocaleDateString()}
+                        {safeDateOnlyFormat(insight.lastUpdated)}
                       </span>
                     </div>
                   </div>
@@ -248,7 +248,7 @@ export function UnifiedInsights() {
                     <div>
                       <span className="text-sm font-medium">Timestamp: </span>
                       <span className="text-sm text-muted-foreground">
-                        {validation.timestamp.toLocaleDateString()}
+                        {safeDateOnlyFormat(validation.timestamp)}
                       </span>
                     </div>
                   </div>

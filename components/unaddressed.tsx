@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertTriangle, Lightbulb, Target, TrendingUp, Zap, Users } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat } from "@/lib/utils"
 
 interface UnaddressedTopic {
   id: string
@@ -166,7 +167,7 @@ export function Unaddressed() {
                     <div>
                       <span className="text-sm font-medium">Affected Population: </span>
                       <span className="text-sm text-muted-foreground">
-                        {topic.affectedPopulation.toLocaleString()}+ people
+                        {safeNumberFormat(topic.affectedPopulation)}+ people
                       </span>
                     </div>
                     <div>

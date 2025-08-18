@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Globe, MapPin, AlertTriangle, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { GeographicData } from "@/lib/analytics-types"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export function GeographicVisualization() {
   const [geographicData, setGeographicData] = useState<GeographicData[]>([])
@@ -143,7 +144,7 @@ export function GeographicVisualization() {
                     <p className="text-lg font-semibold text-gray-700">Live Global T1D Activity</p>
                     <p className="text-sm text-gray-500 mt-2">
                       Monitoring {geographicData.length} countries •{" "}
-                      {geographicData.reduce((sum, country) => sum + country.mentions, 0).toLocaleString()} total
+                      {safeNumberFormat(geographicData.reduce((sum, country) => sum + country.mentions, 0))} total
                       mentions
                     </p>
                   </div>
@@ -201,7 +202,7 @@ export function GeographicVisualization() {
                     </div>
                     <div>
                       <h4 className="font-medium group-hover:text-blue-600 transition-colors">{country.country}</h4>
-                      <p className="text-sm text-muted-foreground">{country.mentions.toLocaleString()} mentions</p>
+                      <p className="text-sm text-muted-foreground">{safeNumberFormat(country.mentions)} mentions</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -238,7 +239,7 @@ export function GeographicVisualization() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <div className="text-muted-foreground">Mentions</div>
-                  <div className="font-medium text-lg">{country.mentions.toLocaleString()}</div>
+                  <div className="font-medium text-lg">{safeNumberFormat(country.mentions)}</div>
                 </div>
                 <div>
                   <div className="text-muted-foreground">Sentiment</div>

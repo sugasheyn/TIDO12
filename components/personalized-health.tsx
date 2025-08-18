@@ -177,7 +177,7 @@ export function PersonalizedHealth() {
                       className="h-2" 
                     />
                     <div className="text-xs text-muted-foreground">
-                      Last tested: {test.lastTested.toLocaleDateString()}
+                      Last tested: {safeDateOnlyFormat(test.lastTested)}
                     </div>
                   </div>
                 </CardContent>

@@ -8,6 +8,7 @@ import { Globe, Activity, TrendingUp, AlertCircle, Clock, ExternalLink, RefreshC
 import { useLiveData, useSources } from "@/hooks/use-live-data"
 import { Skeleton } from "@/components/ui/skeleton"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface LivePost {
   id: number
@@ -113,13 +114,13 @@ export default function LiveFeedPage() {
             Live T1D Feed
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Real-time monitoring of Type 1 diabetes conversations across {liveData.totalSources.toLocaleString()}+ global sources
+            Real-time monitoring of Type 1 diabetes conversations across {safeNumberFormat(liveData.totalSources)}+ global sources
           </p>
           {error && (
             <p className="text-sm text-red-500">Some data may be unavailable. Using generated data.</p>
           )}
           {lastUpdated && (
-            <p className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</p>
+            <p className="text-xs text-muted-foreground">Last updated: {safeTimeFormat(lastUpdated)}</p>
           )}
         </div>
 
@@ -129,7 +130,7 @@ export default function LiveFeedPage() {
             <CardContent className="p-6 text-center">
               <div className="flex items-center justify-center mb-2">
                 <Globe className="h-6 w-6 text-primary mr-2" />
-                <span className="text-2xl font-bold text-primary">{liveData.totalSources.toLocaleString()}</span>
+                <span className="text-2xl font-bold text-primary">{safeNumberFormat(liveData.totalSources)}</span>
               </div>
               <p className="text-sm text-muted-foreground">Total Sources</p>
             </CardContent>
@@ -139,7 +140,7 @@ export default function LiveFeedPage() {
             <CardContent className="p-6 text-center">
               <div className="flex items-center justify-center mb-2">
                 <Activity className="h-6 w-6 text-emerald-600 mr-2" />
-                <span className="text-2xl font-bold text-emerald-600">{liveData.activeFeeds.toLocaleString()}</span>
+                <span className="text-2xl font-bold text-emerald-600">{safeNumberFormat(liveData.activeFeeds)}</span>
               </div>
               <p className="text-sm text-muted-foreground">Active Feeds</p>
             </CardContent>
@@ -308,7 +309,7 @@ export default function LiveFeedPage() {
                 {Object.entries(sourceBreakdown).map(([platform, count]) => (
                   <div key={platform} className="flex justify-between items-center">
                     <span className="text-sm">{platform}</span>
-                    <span className="text-sm font-medium">{count.toLocaleString()} sources</span>
+                    <span className="text-sm font-medium">{safeNumberFormat(count)} sources</span>
                   </div>
                 ))}
               </CardContent>

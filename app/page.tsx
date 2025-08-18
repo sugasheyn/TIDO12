@@ -22,6 +22,7 @@ import { useLiveData } from "@/hooks/use-live-data"
 import { Button } from "@/components/ui/button"
 import { UserProfile } from "@/components/auth/user-profile"
 import Link from "next/link"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export default function HomePage() {
   const { sources, loading, error, lastUpdated, refreshData } = useLiveData()
@@ -63,7 +64,7 @@ export default function HomePage() {
             </Badge>
             <Badge variant="secondary" className="px-6 py-3 text-base bg-card border-2 border-primary/20">
               <Users className="h-5 w-5 mr-3 text-primary" />
-              <span className="font-semibold">{sourcesCount > 0 ? `${sourcesCount.toLocaleString()}+ Sources` : '50K+ Sources'}</span>
+              <span className="font-semibold">{sourcesCount > 0 ? `${safeNumberFormat(sourcesCount)}+ Sources` : '50K+ Sources'}</span>
             </Badge>
             <Badge variant="secondary" className="px-6 py-3 text-base bg-card border-2 border-primary/20">
               <Brain className="h-5 w-5 mr-3 text-primary" />
@@ -89,7 +90,7 @@ export default function HomePage() {
             </Button>
             {lastUpdated && (
               <span className="text-sm text-muted-foreground">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                Last updated: {safeTimeFormat(lastUpdated)}
               </span>
             )}
             {error && (
@@ -162,6 +163,9 @@ export default function HomePage() {
             </TabsTrigger>
             <TabsTrigger value="public-data" className="text-xs font-medium">
               🌍 Public Data
+            </TabsTrigger>
+            <TabsTrigger value="real-data" className="text-xs font-medium">
+              🔗 Real Data
             </TabsTrigger>
             </TabsList>
           </div>
@@ -331,6 +335,22 @@ export default function HomePage() {
                 <Button asChild>
                   <Link href="/public-data">
                     Explore Public Data Hub
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="real-data" className="mt-8">
+            <div className="bg-card rounded-2xl p-6 shadow-xl border border-border/50">
+              <div className="text-center py-8">
+                <h3 className="text-xl font-semibold mb-4">🔗 Real Data Dashboard</h3>
+                <p className="text-gray-600 mb-6">
+                  Live data from verified sources including PubMed, ClinicalTrials.gov, GitHub, Reddit, and FDA MAUDE database.
+                </p>
+                <Button asChild>
+                  <Link href="/real-data">
+                    View Real Data Dashboard
                   </Link>
                 </Button>
               </div>

@@ -10,6 +10,7 @@ import { useLiveData } from "@/hooks/use-live-data"
 import { Skeleton } from "@/components/ui/skeleton"
 import { dataGenerator } from "@/lib/data-generator"
 import { useState, useEffect } from "react"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface BloodTestMarker {
   marker: string
@@ -232,7 +233,7 @@ export default function PersonalizedHealthPage() {
             </Button>
             {lastUpdated && (
               <span className="text-sm text-muted-foreground">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                Last updated: {safeTimeFormat(lastUpdated)}
               </span>
             )}
             {error && (

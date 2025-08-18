@@ -6,7 +6,8 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "rss:auto-refresh": "node scripts/start-rss-auto-refresh.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
+
 import { 
   Brain, 
   TrendingUp, 
@@ -612,7 +613,7 @@ export default function AdvancedCorrelationDashboard() {
                       </div>
                       <p className="text-sm text-gray-600">Posts</p>
                       <div className="text-lg font-semibold text-green-600 mt-2">
-                        {platform.engagement.toLocaleString()}
+                        {safeNumberFormat(platform.engagement)}
                       </div>
                       <p className="text-sm text-gray-600">Total Engagement</p>
                     </div>

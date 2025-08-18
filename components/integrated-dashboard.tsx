@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TrendingUp, Activity, Users, Globe, Zap, Shield, Database } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface DashboardMetric {
   id: string
@@ -217,7 +218,7 @@ export function IntegratedDashboard() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-3xl font-bold text-foreground">
-                        {metric.value.toLocaleString()}
+                        {safeNumberFormat(metric.value)}
                       </span>
                       <span className="text-lg text-muted-foreground">{metric.unit}</span>
                     </div>
@@ -232,7 +233,7 @@ export function IntegratedDashboard() {
                       className="h-2" 
                     />
                     <div className="text-xs text-muted-foreground">
-                      Target: {metric.target.toLocaleString()} {metric.unit}
+                      Target: {safeNumberFormat(metric.target)} {metric.unit}
                     </div>
                   </div>
                 </CardContent>
@@ -344,7 +345,7 @@ export function IntegratedDashboard() {
                       </div>
                       <p className="text-sm text-muted-foreground mb-2">{alert.message}</p>
                       <span className="text-xs text-muted-foreground">
-                        {alert.timestamp.toLocaleString()}
+                        {safeNumberFormat(alert.timestamp)}
                       </span>
                     </div>
                     <Button variant="outline" size="sm">

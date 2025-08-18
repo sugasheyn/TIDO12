@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Activity, TrendingUp, CheckCircle, Globe, Database, Brain } from "lucide-react"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export function PlatformOverview() {
   const stats = [
@@ -89,7 +90,7 @@ export function PlatformOverview() {
                     />
                     <span className="text-sm font-medium">{category.name}</span>
                     <Badge variant="outline" className="text-xs">
-                      {category.count.toLocaleString()}
+                      {safeNumberFormat(category.count)}
                     </Badge>
                   </div>
                   <span className="text-sm text-muted-foreground">{category.percentage}%</span>

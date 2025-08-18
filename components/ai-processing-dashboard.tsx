@@ -20,6 +20,7 @@ import {
   TrendingUp,
 } from "lucide-react"
 import type { ProcessingJob, AIModel } from "@/lib/ai-types"
+import { safeNumberFormat } from "@/lib/utils"
 
 export function AIProcessingDashboard() {
   const [jobs, setJobs] = useState<ProcessingJob[]>([])
@@ -138,7 +139,7 @@ export function AIProcessingDashboard() {
     try {
       const dateObj = typeof date === "string" ? new Date(date) : date
       if (isNaN(dateObj.getTime())) return "Invalid date"
-      return dateObj.toLocaleDateString()
+      return safeDateOnlyFormat(dateObj)
     } catch (error) {
       return "Invalid date"
     }
@@ -161,7 +162,7 @@ export function AIProcessingDashboard() {
     try {
       const timeObj = typeof time === "string" ? new Date(time) : time
       if (isNaN(timeObj.getTime())) return "Unknown"
-      return timeObj.toLocaleTimeString()
+      return safeTimeFormat(timeObj)
     } catch (error) {
       return "Unknown"
     }
@@ -207,7 +208,7 @@ export function AIProcessingDashboard() {
             <Brain className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{processingStats.totalProcessed.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{safeNumberFormat(processingStats.totalProcessed)}</div>
             <p className="text-xs text-muted-foreground">+12.3% from yesterday</p>
           </CardContent>
         </Card>
@@ -379,7 +380,7 @@ export function AIProcessingDashboard() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <div className="text-muted-foreground">Training Samples</div>
-                        <div>{model.trainingData.samples.toLocaleString()}</div>
+                        <div>{safeNumberFormat(model.trainingData?.samples)}</div>
                       </div>
                       <div>
                         <div className="text-muted-foreground">Last Trained</div>

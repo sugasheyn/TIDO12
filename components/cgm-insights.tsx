@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TrendingUp, Activity, AlertTriangle, Clock, Target, Zap } from "lucide-react"
 import { realAPIs } from "@/lib/real-apis"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface CGMData {
   id: string
@@ -192,7 +193,7 @@ export function CGMInsights() {
                   <div>
                     <div className="font-semibold">{reading.glucose} mg/dL</div>
                     <div className="text-sm text-muted-foreground">
-                      {reading.timestamp.toLocaleTimeString()} - {reading.notes}
+                      {safeTimeFormat(reading.timestamp)} - {reading.notes}
                     </div>
                   </div>
                 </div>

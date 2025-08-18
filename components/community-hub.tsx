@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Users, MessageCircle, TrendingUp, Heart, Share2, Globe } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface CommunityPost {
   id: string
@@ -170,7 +171,7 @@ export function CommunityHub() {
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <span>By {post.author}</span>
                     <span>•</span>
-                    <span>{post.timestamp.toLocaleDateString()}</span>
+                    <span>{safeDateOnlyFormat(post.timestamp)}</span>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -224,20 +225,20 @@ export function CommunityHub() {
                       <div>
                         <span className="font-medium">Engagement: </span>
                         <span className="text-muted-foreground">
-                          {topic.engagement.toLocaleString()}
+                          {safeNumberFormat(topic.engagement)}
                         </span>
                       </div>
                       <div>
                         <span className="font-medium">Participants: </span>
                         <span className="text-muted-foreground">
-                          {topic.participants.toLocaleString()}
+                          {safeNumberFormat(topic.participants)}
                         </span>
                       </div>
                     </div>
                     <div>
                       <span className="text-sm font-medium">Last Activity: </span>
                       <span className="text-sm text-muted-foreground">
-                        {topic.lastActivity.toLocaleDateString()}
+                        {safeDateOnlyFormat(topic.lastActivity)}
                       </span>
                     </div>
                   </div>

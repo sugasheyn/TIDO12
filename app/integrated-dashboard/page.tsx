@@ -21,6 +21,7 @@ import {
   Cell,
 } from "recharts"
 import { Globe, TrendingUp, Brain, AlertTriangle, MapPin, Link, Languages, Activity } from "lucide-react"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 // Real global T1D discoveries with sources
 const globalDiscoveries = [
@@ -201,7 +202,7 @@ export default function IntegratedDashboard() {
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-gray-900">Global T1D Discovery Intelligence Platform</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Advanced AI algorithms analyzing {processingMetrics.totalSources.toLocaleString()}+ global sources across{" "}
+            Advanced AI algorithms analyzing {safeNumberFormat(processingMetrics.totalSources)}+ global sources across{" "}
             {processingMetrics.activeCountries} countries in {processingMetrics.languagesProcessed} languages
           </p>
         </div>
@@ -218,19 +219,19 @@ export default function IntegratedDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
-                  {processingMetrics.postsAnalyzed.toLocaleString()}
+                  {safeNumberFormat(processingMetrics.postsAnalyzed)}
                 </div>
                 <div className="text-sm text-gray-600">Posts Analyzed</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-emerald-600">
-                  {processingMetrics.translationsCompleted.toLocaleString()}
+                  {safeNumberFormat(processingMetrics.translationsCompleted)}
                 </div>
                 <div className="text-sm text-gray-600">Translations Completed</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-purple-600">
-                  {processingMetrics.patternsDetected.toLocaleString()}
+                  {safeNumberFormat(processingMetrics.patternsDetected)}
                 </div>
                 <div className="text-sm text-gray-600">Patterns Detected</div>
               </div>
@@ -308,7 +309,7 @@ export default function IntegratedDashboard() {
                           <strong>Method:</strong> {selectedDiscovery.methodology}
                         </div>
                         <div>
-                          <strong>Data Points:</strong> {selectedDiscovery.supportingData.toLocaleString()}
+                          <strong>Data Points:</strong> {safeNumberFormat(selectedDiscovery.supportingData)}
                         </div>
                         <div>
                           <strong>Timeframe:</strong> {selectedDiscovery.timeframe}

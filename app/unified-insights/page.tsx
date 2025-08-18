@@ -10,6 +10,7 @@ import { ExternalLink, Search, TrendingUp, Network, Globe, Brain, AlertTriangle,
 import { useLiveData } from "@/hooks/use-live-data"
 import { Skeleton } from "@/components/ui/skeleton"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface UnifiedInsight {
   id: string
@@ -191,7 +192,7 @@ export default function UnifiedInsightsPage() {
             </Button>
             {lastUpdated && (
               <span className="text-sm text-muted-foreground">
-                Last updated: {lastUpdated.toLocaleTimeString()}
+                Last updated: {safeTimeFormat(lastUpdated)}
               </span>
             )}
             {error && (
@@ -388,7 +389,7 @@ export default function UnifiedInsightsPage() {
                       <div className="text-sm text-gray-600">Countries</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold">{insight.geographic.totalMentions.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">{safeNumberFormat(insight.geographic.totalMentions)}</div>
                       <div className="text-sm text-gray-600">Total Mentions</div>
                     </div>
                   </div>

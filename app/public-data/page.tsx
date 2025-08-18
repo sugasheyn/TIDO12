@@ -32,6 +32,7 @@ import {
 import { usePublicData } from "@/hooks/use-public-data"
 import { GlucoseDataPoint, InsulinDataPoint, DataPattern } from "@/lib/public-data-retriever"
 import { formatDistanceToNow, format } from "date-fns"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export default function PublicDataPage() {
   const [activeTab, setActiveTab] = useState("overview")
@@ -236,7 +237,7 @@ export default function PublicDataPage() {
                 <div>
                   <p className="text-sm text-gray-600">Total Data Points</p>
                   <p className="text-2xl font-bold text-blue-600">
-                    {summary ? summary.totalDataPoints.toLocaleString() : '...'}
+                    {summary ? safeNumberFormat(summary.totalDataPoints) : '...'}
                   </p>
                 </div>
               </div>
@@ -252,7 +253,7 @@ export default function PublicDataPage() {
                 <div>
                   <p className="text-sm text-gray-600">Active Users</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {summary ? summary.activeUsers.toLocaleString() : '...'}
+                    {summary ? safeNumberFormat(summary.activeUsers) : '...'}
                   </p>
                 </div>
               </div>
@@ -714,7 +715,7 @@ export default function PublicDataPage() {
                         
                         <div className="mt-4 pt-4 border-t border-gray-200">
                           <div className="flex items-center justify-between text-sm text-gray-500">
-                            <span>Data Points: {pattern.dataPoints.toLocaleString()}</span>
+                            <span>Data Points: {safeNumberFormat(pattern.dataPoints)}</span>
                             <span>Discovered: {formatDistanceToNow(pattern.discoveredAt, { addSuffix: true })}</span>
                           </div>
                         </div>
@@ -760,7 +761,7 @@ export default function PublicDataPage() {
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg">
                         <Users className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                        <p className="text-lg font-semibold text-purple-600">{summary.activeUsers.toLocaleString()}</p>
+                        <p className="text-lg font-semibold text-purple-600">{safeNumberFormat(summary.activeUsers)}</p>
                         <p className="text-sm text-gray-600">Active Users</p>
                       </div>
                     </div>

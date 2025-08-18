@@ -15,6 +15,7 @@ import { Users, Heart, MessageCircle, Share2, TrendingUp, Globe, Search, Filter,
 import { AuthGuard } from "@/components/auth/auth-guard"
 import Link from "next/link"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export default function CommunityPage() {
   const { data: session } = useSession()
@@ -139,14 +140,14 @@ export default function CommunityPage() {
                 <Card className="text-center">
                   <CardContent className="p-4">
                     <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                    <div className="text-2xl font-bold text-blue-600">{communityStats.totalMembers.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-blue-600">{safeNumberFormat(communityStats.totalMembers)}</div>
                     <div className="text-sm text-gray-600">Total Members</div>
                   </CardContent>
                 </Card>
                 <Card className="text-center">
                   <CardContent className="p-4">
                     <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                    <div className="text-2xl font-bold text-green-600">{communityStats.activeToday.toLocaleString()}</div>
+                    <div className="text-2xl font-bold text-green-600">{safeNumberFormat(communityStats.activeToday)}</div>
                     <div className="text-sm text-gray-600">Active Today</div>
                   </CardContent>
                 </Card>

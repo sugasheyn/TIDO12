@@ -8,6 +8,9 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Globe, Database, Users, TrendingUp, Activity, Shield, Zap, Search } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat } from "@/lib/utils"
+
+
 
 interface ExpandedDataSource {
   id: string
@@ -282,7 +285,7 @@ export function ExpandedSources() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Record Count</span>
                       <span className="text-sm font-semibold">
-                        {source.recordCount.toLocaleString()}
+                        {safeNumberFormat(source.recordCount)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -305,7 +308,7 @@ export function ExpandedSources() {
                     <div>
                       <span className="text-sm font-medium">Last Sync: </span>
                       <span className="text-sm text-muted-foreground">
-                        {source.lastSync.toLocaleString()}
+                        {safeNumberFormat(source.lastSync)}
                       </span>
                     </div>
                     <div>
@@ -341,7 +344,7 @@ export function ExpandedSources() {
                       <div>
                         <span className="font-medium">Records: </span>
                         <span className="text-muted-foreground">
-                          {category.totalRecords.toLocaleString()}
+                          {safeNumberFormat(category.totalRecords)}
                         </span>
                       </div>
                     </div>
@@ -353,7 +356,7 @@ export function ExpandedSources() {
                     <div>
                       <span className="text-sm font-medium">Last Updated: </span>
                       <span className="text-sm text-muted-foreground">
-                        {category.lastUpdated.toLocaleDateString()}
+                        {safeDateOnlyFormat(category.lastUpdated)}
                       </span>
                     </div>
                   </div>
@@ -389,7 +392,7 @@ export function ExpandedSources() {
             </div>
             <div className="text-center p-4 bg-muted/50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600">
-                {sources.reduce((sum, s) => sum + s.recordCount, 0).toLocaleString().slice(0, -6)}M
+                {safeNumberFormat(sources.reduce((sum, s) => sum + s.recordCount, 0)).slice(0, -6)}M
               </div>
               <div className="text-sm text-muted-foreground">Total Records</div>
             </div>

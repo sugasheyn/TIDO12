@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Database, Users, FileText, Clock, TrendingUp, MessageSquare, ExternalLink } from "lucide-react"
 import Link from "next/link"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export function SourceMonitor() {
   const [realTimeData, setRealTimeData] = useState({
@@ -95,7 +96,7 @@ export function SourceMonitor() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Sources</p>
-                <p className="text-2xl font-bold">{realTimeData.totalSources.toLocaleString()}</p>
+                <p className="text-2xl font-bold">{safeNumberFormat(realTimeData.totalSources)}</p>
               </div>
               <Database className="h-8 w-8 text-blue-500" />
             </div>
@@ -107,7 +108,7 @@ export function SourceMonitor() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Sources</p>
-                <p className="text-2xl font-bold text-emerald-600">{realTimeData.activeSources.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-emerald-600">{safeNumberFormat(realTimeData.activeSources)}</p>
               </div>
               <Users className="h-8 w-8 text-emerald-500" />
             </div>
@@ -119,7 +120,7 @@ export function SourceMonitor() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Posts Today</p>
-                <p className="text-2xl font-bold text-purple-600">{realTimeData.postsToday.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-purple-600">{safeNumberFormat(realTimeData.postsToday)}</p>
               </div>
               <MessageSquare className="h-8 w-8 text-purple-500" />
             </div>
@@ -236,7 +237,7 @@ export function SourceMonitor() {
                     <Progress value={(source.active / (source.communities || source.accounts)) * 100} className="h-2" />
                     <div className="flex justify-between text-sm text-muted-foreground">
                       <span>Posts Today:</span>
-                      <span>{source.posts.toLocaleString()}</span>
+                      <span>{safeNumberFormat(source.posts)}</span>
                     </div>
                   </div>
                 </CardContent>

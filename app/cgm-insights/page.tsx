@@ -23,6 +23,7 @@ import { useLiveData } from "@/hooks/use-live-data"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface CGMInsight {
   id: string
@@ -168,7 +169,7 @@ export default function CGMInsightsPage() {
           </Button>
           {lastUpdated && (
             <span className="text-sm text-muted-foreground">
-              Last updated: {lastUpdated.toLocaleTimeString()}
+              Last updated: {safeTimeFormat(lastUpdated)}
             </span>
           )}
           {error && (
@@ -242,7 +243,7 @@ export default function CGMInsightsPage() {
                     </div>
 
                     <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t">
-                      <span>{insight.dataPoints.toLocaleString()} data points</span>
+                      <span>{safeNumberFormat(insight.dataPoints)} data points</span>
                       <span>{insight.timeRange}</span>
                     </div>
                   </CardContent>

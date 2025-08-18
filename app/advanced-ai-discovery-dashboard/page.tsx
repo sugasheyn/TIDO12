@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { safeDateFormat } from '@/lib/utils';
 
 interface DiscoveryResult {
   extraction_results: any;
@@ -326,7 +327,7 @@ export default function AdvancedAIDiscoveryDashboard() {
                     <div className="text-sm space-y-1">
                       <div><strong>Burst Score:</strong> {topic.burst_score.toFixed(2)}</div>
                       <div><strong>Propagation Rate:</strong> {topic.propagation_rate.toFixed(2)}</div>
-                      <div><strong>Peak Time:</strong> {new Date(topic.peak_time).toLocaleString()}</div>
+                      <div><strong>Peak Time:</strong> {safeDateFormat(new Date(topic.peak_time))}</div>
                     </div>
                   </div>
                 ))}

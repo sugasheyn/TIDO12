@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { TrendingUp, TrendingDown, AlertTriangle, Zap, Brain, Target } from "lucide-react"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface Pattern {
   id: string
@@ -268,7 +269,7 @@ export default function PatternDetectionDashboard() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Sample Size</span>
-                      <span className="font-medium">{correlation.sample_size.toLocaleString()}</span>
+                      <span className="font-medium">{safeNumberFormat(correlation.sample_size)}</span>
                     </div>
                   </div>
                 </CardContent>

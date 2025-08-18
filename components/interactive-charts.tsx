@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { BarChart3, LineChart, PieChart, Download, TrendingUp } from "lucide-react"
 import type { TimeSeriesData } from "@/lib/analytics-types"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 export function InteractiveCharts() {
   const [selectedMetric, setSelectedMetric] = useState("content_volume")
@@ -43,7 +44,7 @@ export function InteractiveCharts() {
     // Simulate CSV export
     const csvContent = [
       ["Date", "Value", "Category"],
-      ...timeSeriesData.map((item) => [item.timestamp.toLocaleDateString(), item.value, item.category]),
+      ...timeSeriesData.map((item) => [safeDateOnlyFormat(item.timestamp), item.value, item.category]),
     ]
       .map((row) => row.join(","))
       .join("\n")
@@ -63,7 +64,7 @@ export function InteractiveCharts() {
 
   chartData.current = useMemo(() => {
     return timeSeriesData.map((item) => ({
-      date: item.timestamp.toLocaleDateString(),
+      date: safeDateOnlyFormat(item.timestamp),
       value: item.value,
       category: item.category,
     }))
@@ -120,11 +121,11 @@ export function InteractiveCharts() {
                 <div className="flex justify-between items-start">
                   <div className="text-sm text-gray-700 space-y-1">
                     <div className="font-bold text-lg text-emerald-600">
-                      {chartData.current[chartData.current.length - 1]?.value.toLocaleString() || 0}
+                      {chartData.current[chartData.current.length - 1]?.safeNumberFormat(value) || 0}
                     </div>
                     <div className="text-xs">Current Value</div>
                     <div className="text-xs text-blue-600">
-                      Peak: {Math.max(...chartData.current.map((d) => d.value)).toLocaleString()}
+                      Peak: {safeNumberFormat(Math.max(...chartData.current.map((d) => d.value)))}
                     </div>
                     <div className="text-xs text-purple-600">
                       Growth: +
@@ -156,7 +157,7 @@ export function InteractiveCharts() {
                         {item.date.split("/")[1]}/{item.date.split("/")[2]}
                       </div>
                       <div className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                        {item.value.toLocaleString()}
+                        {safeNumberFormat(item.value)}
                       </div>
                     </div>
                   ))}

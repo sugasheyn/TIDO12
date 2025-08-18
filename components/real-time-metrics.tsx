@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Activity, Zap, Clock, TrendingUp, AlertCircle, CheckCircle } from "lucide-react"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface ActivityEvent {
   timestamp: Date
@@ -174,7 +175,7 @@ export function RealTimeMetrics() {
                 ? "Reconnecting"
                 : "Disconnected"}
           </span>
-          <span className="text-xs text-muted-foreground">• Updated {lastUpdate.toLocaleTimeString()}</span>
+          <span className="text-xs text-muted-foreground">• Updated {safeTimeFormat(lastUpdate)}</span>
         </div>
       </div>
 
@@ -277,7 +278,7 @@ export function RealTimeMetrics() {
                     <Badge variant={getEventBadge(activity.type) as any} className="text-xs">
                       {activity.type}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">{activity.timestamp.toLocaleTimeString()}</span>
+                    <span className="text-xs text-muted-foreground">{safeTimeFormat(activity.timestamp)}</span>
                   </div>
                 </div>
               </div>

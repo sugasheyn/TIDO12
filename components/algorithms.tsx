@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Zap, Brain, TrendingUp, Activity, Shield, Users, Globe } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface Algorithm {
   id: string
@@ -282,7 +283,7 @@ export function Algorithms() {
                     <div>
                       <span className="text-sm font-medium">Last Updated: </span>
                       <span className="text-sm text-muted-foreground">
-                        {algorithm.lastUpdated.toLocaleDateString()}
+                        {safeDateOnlyFormat(algorithm.lastUpdated)}
                       </span>
                     </div>
                   </div>
@@ -303,13 +304,13 @@ export function Algorithms() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="text-3xl font-bold text-foreground">
-                        {metric.value.toLocaleString()}
+                        {safeNumberFormat(metric.value)}
                       </span>
                       <span className="text-lg text-muted-foreground">{metric.unit}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
-                        {getTrendIcon(metric.trend)} Target: {metric.target.toLocaleString()}
+                        {getTrendIcon(metric.trend)} Target: {safeNumberFormat(metric.target)}
                       </span>
                     </div>
                     <Progress 
@@ -317,7 +318,7 @@ export function Algorithms() {
                       className="h-2" 
                     />
                     <div className="text-xs text-muted-foreground">
-                      Updated: {metric.lastUpdated.toLocaleTimeString()}
+                      Updated: {safeTimeFormat(metric.lastUpdated)}
                     </div>
                   </div>
                 </CardContent>

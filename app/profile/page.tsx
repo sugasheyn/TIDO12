@@ -612,7 +612,7 @@ export default function ProfilePage() {
                   <Calendar className="h-5 w-5 text-green-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {userProfile.createdAt.toLocaleDateString()}
+                      {safeDateOnlyFormat(userProfile.createdAt)}
                     </p>
                     <p className="text-xs text-gray-500">Member since</p>
                   </div>
@@ -622,7 +622,7 @@ export default function ProfilePage() {
                   <Activity className="h-5 w-5 text-purple-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      {userProfile.updatedAt.toLocaleDateString()}
+                      {safeDateOnlyFormat(userProfile.updatedAt)}
                     </p>
                     <p className="text-xs text-gray-500">Last updated</p>
                   </div>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { AlertTriangle, Database, TrendingUp, CheckCircle, ExternalLink, Activity } from "lucide-react"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface JaebIntegrationData {
   sources: any[]
@@ -76,7 +77,7 @@ export default function JaebIntegrationPage() {
           </p>
         </div>
         <Badge variant="outline" className="text-lg px-4 py-2">
-          {data.summary.totalDataPoints.toLocaleString()} Data Points
+          {safeNumberFormat(data.summary.totalDataPoints)} Data Points
         </Badge>
       </div>
 

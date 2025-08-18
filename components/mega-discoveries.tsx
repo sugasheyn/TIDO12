@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Zap, TrendingUp, Globe, Users, Brain, Activity } from "lucide-react"
 import { dataGenerator } from "@/lib/data-generator"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
 
 interface MegaScaleMetric {
   id: string
@@ -154,7 +155,7 @@ export function MegaDiscoveries() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-3xl font-bold text-foreground">
-                    {metric.value.toLocaleString()}
+                    {safeNumberFormat(metric.value)}
                   </span>
                   <span className="text-lg text-muted-foreground">{metric.unit}</span>
                 </div>
@@ -200,10 +201,10 @@ export function MegaDiscoveries() {
                 <p className="text-sm text-muted-foreground mb-3">{discovery.description}</p>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {discovery.sources.toLocaleString()} sources
+                    {safeNumberFormat(discovery.sources)} sources
                   </span>
                   <span className="text-muted-foreground">
-                    {discovery.timestamp.toLocaleDateString()}
+                    {safeDateOnlyFormat(discovery.timestamp)}
                   </span>
                 </div>
                 <div className="mt-2">

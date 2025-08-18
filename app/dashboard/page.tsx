@@ -503,7 +503,7 @@ export default function DashboardPage() {
                       ))}
                     </div>
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Pinned {content.pinnedAt.toLocaleDateString()}</span>
+                      <span>Pinned {safeDateOnlyFormat(content.pinnedAt)}</span>
                       <div className="flex items-center space-x-2">
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                           <Share2 className="h-4 w-4" />
@@ -603,7 +603,7 @@ export default function DashboardPage() {
                     </div>
                     {subscription.lastSent && (
                       <div className="mt-4 pt-3 border-t text-xs text-gray-500">
-                        Last sent: {subscription.lastSent.toLocaleDateString()}
+                        Last sent: {safeDateOnlyFormat(subscription.lastSent)}
                       </div>
                     )}
                   </CardContent>
