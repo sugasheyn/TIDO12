@@ -1,6 +1,9 @@
 // Social Media Correlation Analyzer for Diabetes Insights
 // Finds commonalities among social media posts worldwide and correlates with scientific data
 
+import { RSSFeedManager } from './rss-feed-manager';
+import { isProduction } from './replit-environment';
+
 export interface SocialMediaPost {
   id: string;
   platform: 'twitter' | 'reddit' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'forums' | 'blogs';
@@ -49,6 +52,7 @@ export interface CorrelationInsight {
   benefits: string[];
   recommendations: string[];
   timestamp: Date;
+  keywords?: string[]; // Add optional keywords field
 }
 
 export interface EmergingTrend {
@@ -86,7 +90,10 @@ export class SocialMediaCorrelationAnalyzer {
   constructor() {
     this.rssFeedManager = new RSSFeedManager();
     this.initializeAdvancedAnalyzers();
-    this.loadSampleSocialMediaData();
+    // Avoid seeding sample data in production to ensure only real pipeline data is used
+    if (!isProduction()) {
+      this.loadSampleSocialMediaData();
+    }
   }
 
   private initializeAdvancedAnalyzers(): void {
@@ -365,7 +372,8 @@ export class SocialMediaCorrelationAnalyzer {
           'Monitor individual effectiveness',
           'Consider lemon-flavored alternatives if needed'
         ],
-        timestamp: new Date()
+        timestamp: new Date(),
+        keywords: ['lemon']
       });
     }
     
@@ -406,7 +414,8 @@ export class SocialMediaCorrelationAnalyzer {
           'Monitor glucose response patterns',
           'Consult healthcare provider before starting'
         ],
-        timestamp: new Date()
+        timestamp: new Date(),
+        keywords: ['cinnamon']
       });
     }
     
@@ -447,7 +456,8 @@ export class SocialMediaCorrelationAnalyzer {
           'Gradually increase exposure time',
           'Monitor glucose response and consult healthcare provider'
         ],
-        timestamp: new Date()
+        timestamp: new Date(),
+        keywords: ['cold']
       });
     }
     
@@ -706,10 +716,10 @@ export class SocialMediaCorrelationAnalyzer {
         hashtags: [],
         language: 'en',
         diabetesType: this.classifyDiabetesType(item.content),
-        symptoms: this.extractSymptoms(item.content),
-        treatments: this.extractTreatments(item.content),
-        medications: this.extractMedications(item.content),
-        lifestyleFactors: this.extractLifestyleFactors(item.content)
+        symptoms: this.extractSymptomsFromContent(item.content),
+        treatments: this.extractTreatmentsFromContent(item.content),
+        medications: this.extractMedicationsFromContent(item.content),
+        lifestyleFactors: this.extractLifestyleFactorsFromContent(item.content)
       };
 
       this.socialMediaDatabase.push(socialMediaPost);
@@ -747,7 +757,7 @@ export class SocialMediaCorrelationAnalyzer {
     return 'unknown';
   }
 
-  private extractSymptoms(content: string): string[] {
+  private extractSymptomsFromContent(content: string): string[] {
     const symptoms = ['high blood sugar', 'low blood sugar', 'fatigue', 'thirst', 'frequent urination', 'blurred vision', 'slow healing'];
     const foundSymptoms: string[] = [];
     const lowerContent = content.toLowerCase();
@@ -761,7 +771,7 @@ export class SocialMediaCorrelationAnalyzer {
     return foundSymptoms;
   }
 
-  private extractTreatments(content: string): string[] {
+  private extractTreatmentsFromContent(content: string): string[] {
     const treatments = ['insulin', 'metformin', 'exercise', 'diet', 'cinnamon', 'lemon', 'cold therapy', 'fasting'];
     const foundTreatments: string[] = [];
     const lowerContent = content.toLowerCase();
@@ -775,7 +785,7 @@ export class SocialMediaCorrelationAnalyzer {
     return foundTreatments;
   }
 
-  private extractMedications(content: string): string[] {
+  private extractMedicationsFromContent(content: string): string[] {
     const medications = ['insulin', 'metformin', 'glipizide', 'glimepiride', 'pioglitazone', 'empagliflozin'];
     const foundMedications: string[] = [];
     const lowerContent = content.toLowerCase();
@@ -789,7 +799,7 @@ export class SocialMediaCorrelationAnalyzer {
     return foundMedications;
   }
 
-  private extractLifestyleFactors(content: string): string[] {
+  private extractLifestyleFactorsFromContent(content: string): string[] {
     const factors = ['diet', 'exercise', 'stress', 'sleep', 'alcohol', 'smoking', 'weight management'];
     const foundFactors: string[] = [];
     const lowerContent = content.toLowerCase();

@@ -919,7 +919,7 @@ export class AdvancedDiscoveryAIModels {
         relevance: 0.8,
         verdict: 'Partially supported by research',
         confidence: 0.7,
-        url: 'https://example.com/study'
+        url: 'https://pubmed.ncbi.nlm.nih.gov/'
       }
     ]
   }

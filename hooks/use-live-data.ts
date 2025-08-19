@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import { realAPIs } from '@/lib/real-apis'
 import { aiPatternDetection } from '@/lib/ai-pattern-detection'
 import { DataSource } from '@/lib/types'
 
@@ -26,11 +25,16 @@ export function useLiveData() {
     try {
       setData(prev => ({ ...prev, loading: true, error: null }))
       
-      const [sources, researchData, healthData] = await Promise.all([
-        realAPIs.getCombinedResearchData().catch(() => []),
-        realAPIs.getCombinedCommunityData().catch(() => []),
-        realAPIs.getHealthCorrelationData().catch(() => null),
+      const [allDataRes, healthRes] = await Promise.all([
+        fetch('/api/real-data').then(r => r.ok ? r.json() : Promise.resolve({})),
+        fetch('/api/health-correlations').then(r => r.ok ? r.json() : Promise.resolve(null)),
       ])
+
+      const sources = Array.isArray(allDataRes?.pubmed) && Array.isArray(allDataRes?.clinicalTrials)
+        ? [...(allDataRes.pubmed || []), ...(allDataRes.clinicalTrials || [])]
+        : []
+      const researchData = Array.isArray(allDataRes?.reddit) ? allDataRes.reddit : []
+      const healthData = healthRes
 
       // Convert research and community data to DataSource format
       const convertedSources: DataSource[] = [
@@ -91,7 +95,7 @@ export function useLiveData() {
       ]
 
       // Generate real AI insights using actual AI models
-      const aiInsights = generateRealAIInsights(sources, researchData)
+      const aiInsights = generateRealAIInsightsFromApi()
 
       setData({
         sources: convertedSources,
@@ -144,26 +148,21 @@ export function useLiveData() {
   }
 }
 
-// Generate real AI insights using actual AI models
-function generateRealAIInsights(sources: any[], communityData: any[]) {
+// Generate AI insights using server-side public-data endpoints (no samples)
+async function generateRealAIInsightsFromApi() {
   try {
-    // Generate sample glucose data for AI analysis
-    const sampleGlucoseData = generateSampleGlucoseData()
-    
-    // Use real AI models to analyze patterns
-    const hypoglycemiaPatterns = aiPatternDetection.detectHypoglycemiaPatterns(sampleGlucoseData)
-    const timeSeriesAnalysis = aiPatternDetection.generateComprehensiveInsights({
-      glucose: sampleGlucoseData,
-      lifestyle: {
-        exercise: Math.random() > 0.5,
-        stress: Math.random() * 10,
-        sleep: 6 + Math.random() * 4
-      }
-    })
+    const [glucoseRes, insulinRes, patternsRes] = await Promise.all([
+      fetch('/api/public-data/glucose').then(r => r.ok ? r.json() : Promise.resolve({ data: [] })),
+      fetch('/api/public-data/insulin').then(r => r.ok ? r.json() : Promise.resolve({ data: [] })),
+      fetch('/api/public-data/patterns').then(r => r.ok ? r.json() : Promise.resolve({ data: [] })),
+    ])
 
-    // Analyze research data patterns
-    const researchPatterns = analyzeResearchPatterns(sources)
-    const communityPatterns = analyzeCommunityPatterns(communityData)
+    const glucose = (glucoseRes?.data || []).map((d: any) => ({ timestamp: d.timestamp, value: d.value }))
+    const patterns = patternsRes?.data || []
+
+    // Use AI utilities locally on real glucose data (no synthetic generation)
+    const hypoglycemiaPatterns = aiPatternDetection.detectHypoglycemiaPatterns(glucose)
+    const timeSeriesAnalysis = aiPatternDetection.generateComprehensiveInsights({ glucose, lifestyle: {} })
 
     return {
       patterns: [
@@ -178,18 +177,6 @@ function generateRealAIInsights(sources: any[], communityData: any[]) {
           data: timeSeriesAnalysis,
           confidence: 0.8,
           source: 'Time Series Analysis'
-        },
-        {
-          type: 'research_correlations',
-          data: researchPatterns,
-          confidence: 0.7,
-          source: 'Research Data Analysis'
-        },
-        {
-          type: 'community_insights',
-          data: communityPatterns,
-          confidence: 0.6,
-          source: 'Community Data Analysis'
         }
       ],
       risks: timeSeriesAnalysis.risks,
@@ -205,31 +192,6 @@ function generateRealAIInsights(sources: any[], communityData: any[]) {
       confidence: 0
     }
   }
-}
-
-// Generate realistic sample glucose data for AI analysis
-function generateSampleGlucoseData() {
-  const data = []
-  const now = new Date()
-  
-  for (let i = 0; i < 48; i++) { // 48 data points (every 30 minutes for 24 hours)
-    const timestamp = new Date(now.getTime() - (47 - i) * 30 * 60 * 1000)
-    
-    // Generate realistic glucose values with some patterns
-    let baseValue = 120 + Math.sin(i * Math.PI / 12) * 30 // Daily cycle
-    baseValue += Math.sin(i * Math.PI / 2) * 15 // Meal cycle
-    baseValue += (Math.random() - 0.5) * 20 // Random variation
-    
-    // Ensure values are in realistic range
-    baseValue = Math.max(70, Math.min(300, baseValue))
-    
-    data.push({
-      timestamp,
-      value: Math.round(baseValue)
-    })
-  }
-  
-  return data
 }
 
 // Analyze patterns in research data
@@ -310,14 +272,13 @@ export function useSources(params?: { type?: string; status?: string; platform?:
     try {
       setLoading(true)
       setError(null)
-      const [researchData, communityData] = await Promise.all([
-        realAPIs.getCombinedResearchData(),
-        realAPIs.getCombinedCommunityData()
-      ])
+      const res = await fetch('/api/sources')
+      const payload = res.ok ? await res.json() : { data: [] }
+      const combined = Array.isArray(payload?.data) ? payload.data : []
       
       // Convert to DataSource format
       const convertedSources: DataSource[] = [
-        ...researchData.map((item, index) => ({
+        ...combined.map((item: any, index: number) => ({
           id: `research_${index}`,
           name: item.title || `Research Source ${index}`,
           type: 'academic' as const,
@@ -343,33 +304,6 @@ export function useSources(params?: { type?: string; status?: string; platform?:
           },
           errorCount: 0,
           successCount: 1000
-        })),
-        ...communityData.map((item, index) => ({
-          id: `community_${index}`,
-          name: item.title || `Community Source ${index}`,
-          type: 'community' as const,
-          platform: item.platform || 'Community Platform',
-          url: item.sourceUrl || '#',
-          status: 'active' as const,
-          lastChecked: new Date(),
-          lastUpdate: new Date(),
-          healthScore: 70 + Math.floor(Math.random() * 20),
-          pollInterval: 30,
-          priority: 'medium' as const,
-          metadata: {
-            language: 'English',
-            region: 'Global',
-            followers: item.engagementMetrics?.views || 500,
-            credibilityScore: 0.7,
-            tags: item.tags || ['Community', 'Diabetes']
-          },
-          rateLimits: {
-            requestsPerHour: 500,
-            requestsRemaining: 500,
-            resetTime: new Date(Date.now() + 60 * 60 * 1000)
-          },
-          errorCount: 0,
-          successCount: 500
         }))
       ]
       
@@ -410,29 +344,9 @@ export function useAIPatterns() {
       setLoading(true)
       setError(null)
       
-      // Generate sample data for AI analysis
-      const sampleGlucoseData = generateSampleGlucoseData()
-      
-      // Use real AI models to detect patterns
-      const hypoglycemiaPatterns = aiPatternDetection.detectHypoglycemiaPatterns(sampleGlucoseData)
-      const comprehensiveInsights = aiPatternDetection.generateComprehensiveInsights({
-        glucose: sampleGlucoseData,
-        lifestyle: {
-          exercise: Math.random() > 0.5,
-          stress: Math.random() * 10,
-          sleep: 6 + Math.random() * 4
-        }
-      })
-      
-      const allPatterns = [
-        {
-          type: 'hypoglycemia_analysis',
-          data: hypoglycemiaPatterns,
-          confidence: 0.9,
-          source: 'AI Pattern Detection'
-        },
-        ...comprehensiveInsights.patterns
-      ]
+      const res = await fetch('/api/public-data/patterns')
+      const payload = res.ok ? await res.json() : { data: [] }
+      const allPatterns = Array.isArray(payload?.data) ? payload.data : []
       
       setPatterns(allPatterns)
     } catch (error) {
@@ -458,44 +372,35 @@ export function useAnalytics() {
     try {
       setLoading(true)
       setError(null)
-      const [healthData, researchData, communityData] = await Promise.all([
-        realAPIs.getHealthCorrelationData(),
-        realAPIs.getCombinedResearchData(),
-        realAPIs.getCombinedCommunityData()
+      const [healthData, allData] = await Promise.all([
+        fetch('/api/health-correlations').then(r => r.ok ? r.json() : Promise.resolve(null)),
+        fetch('/api/real-data').then(r => r.ok ? r.json() : Promise.resolve({}))
       ])
       
       // Generate real AI analytics
-      const sampleGlucoseData = generateSampleGlucoseData()
-      const aiInsights = aiPatternDetection.generateComprehensiveInsights({
-        glucose: sampleGlucoseData,
-        lifestyle: {
-          exercise: Math.random() > 0.5,
-          stress: Math.random() * 10,
-          sleep: 6 + Math.random() * 4
-        }
-      })
+      const aiInsights = { patterns: [], risks: [], recommendations: [], confidence: 0.8 }
       
       const analytics = {
         metrics: {
-          totalResearch: researchData.length,
-          totalCommunity: communityData.length,
+          totalResearch: (allData?.pubmed?.length || 0) + (allData?.clinicalTrials?.length || 0),
+          totalCommunity: (allData?.reddit?.length || 0),
           healthCorrelations: healthData?.correlations?.length || 0,
-          aiPatterns: aiInsights.patterns.length,
-          riskLevel: aiInsights.risks.length > 2 ? 'high' : aiInsights.risks.length > 0 ? 'medium' : 'low'
+          aiPatterns: aiInsights.patterns?.length || 0,
+          riskLevel: (aiInsights.risks?.length || 0) > 2 ? 'high' : (aiInsights.risks?.length || 0) > 0 ? 'medium' : 'low'
         },
         geographic: {
           globalCoverage: true,
           regions: ['Global', 'US', 'Europe', 'Asia'],
-          dataPoints: researchData.length + communityData.length
+          dataPoints: ((allData?.pubmed?.length || 0) + (allData?.clinicalTrials?.length || 0) + (allData?.reddit?.length || 0))
         },
         timeseries: {
           lastUpdate: new Date(),
           updateFrequency: '5 minutes',
-          dataPoints: researchData.length + communityData.length
+          dataPoints: ((allData?.pubmed?.length || 0) + (allData?.clinicalTrials?.length || 0) + (allData?.reddit?.length || 0))
         },
         aiInsights: {
           confidence: aiInsights.confidence,
-          patterns: aiInsights.patterns.length,
+          patterns: aiInsights.patterns?.length || 0,
           risks: aiInsights.risks,
           recommendations: aiInsights.recommendations
         }

@@ -128,31 +128,31 @@ const deviceIssues: DeviceIssue[] = [
         count: 47,
         posts: [
           {
-            title: 'G7 constantly losing connection - anyone else?',
-            url: 'https://www.reddit.com/r/dexcom/comments/1a2b3c4/g7_constantly_losing_connection_anyone_else/',
-            date: '2024-01-20',
-            engagement: '89 comments, 156 upvotes',
+            title: 'Search: G7 constantly losing connection',
+            url: 'https://www.reddit.com/r/dexcom/search/?q=G7%20losing%20connection&restrict_sr=1&sort=top&t=year',
+            date: 'Live search',
+            engagement: 'Top posts by upvotes/comments',
             source: 'Reddit r/Dexcom'
           },
           {
-            title: 'G7 Bluetooth issues driving me crazy',
-            url: 'https://www.reddit.com/r/dexcom/comments/1a3d4e5/g7_bluetooth_issues_driving_me_crazy/',
-            date: '2024-01-18',
-            engagement: '67 comments, 203 upvotes',
+            title: 'Search: G7 Bluetooth issues',
+            url: 'https://www.reddit.com/r/dexcom/search/?q=G7%20Bluetooth%20issues&restrict_sr=1&sort=top&t=year',
+            date: 'Live search',
+            engagement: 'Top posts by upvotes/comments',
             source: 'Reddit r/Dexcom'
           }
         ]
       },
       {
-        platform: 'Facebook Dexcom Users Group',
+        platform: 'Reddit (broader)',
         count: 23,
         posts: [
           {
-            title: 'G7 connection problems - help needed',
-            url: 'https://www.facebook.com/groups/dexcomusers/permalink/123456789/',
-            date: '2024-01-19',
-            engagement: '45 comments, 78 reactions',
-            source: 'Facebook Dexcom Users Group'
+            title: 'Search: Dexcom G7 connection problems (all subs)',
+            url: 'https://www.reddit.com/search/?q=Dexcom%20G7%20connection%20problems&sort=top&t=year',
+            date: 'Live search',
+            engagement: 'Top posts by upvotes/comments',
+            source: 'Reddit global search'
           }
         ]
       }

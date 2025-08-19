@@ -6,14 +6,15 @@ entrypoint = "app/page.tsx"
 channel = "stable-22_11"
 
 [env]
-NODE_ENV = "development"
 NEXT_PUBLIC_APP_NAME = "T1D AI Platform"
 NEXT_PUBLIC_APP_VERSION = "2.0.0"
 NEXT_PUBLIC_API_BASE_URL = "/api"
-NEXT_PUBLIC_PLATFORM_MODE = "demo"
+NEXT_PUBLIC_PLATFORM_MODE = "production"
 NEXT_PUBLIC_ENABLE_RSS_FEEDS = "true"
 NEXT_PUBLIC_ENABLE_REAL_DATA = "true"
 NEXT_PUBLIC_ENABLE_AI_INSIGHTS = "true"
+NODE_ENV = "production"
+NEXT_PUBLIC_APP_ENVIRONMENT = "replit"
 
 [packager]
 language = "nodejs"
@@ -37,9 +38,3 @@ syntax = "tsx"
 [deployment]
 run = ["bash", "start-replit.sh"]
 deploymentTarget = "cloudrun"
-
-[env.NODE_ENV]
-value = "production"
-
-[env.NEXT_PUBLIC_APP_ENVIRONMENT]
-value = "replit"
