@@ -21,7 +21,10 @@ import {
   BookOpen,
   MessageSquare,
   Settings,
-  User
+  User,
+  Home,
+  FileText,
+  AlertTriangle
 } from 'lucide-react'
 
 interface SearchResult {
@@ -34,38 +37,15 @@ interface SearchResult {
 }
 
 const searchData: SearchResult[] = [
-  // AI & Discovery
-  { id: '1', title: 'AI Insights Dashboard', description: 'Advanced AI-powered research insights', url: '/ai-insights-dashboard', type: 'page', icon: <Brain className="h-4 w-4" /> },
-  { id: '2', title: 'Pattern Detection', description: 'AI-detected patterns and correlations', url: '/patterns', type: 'research', icon: <TrendingUp className="h-4 w-4" /> },
-  { id: '3', title: 'Advanced Discovery', description: 'Deep AI research discovery', url: '/discoveries', type: 'research', icon: <Zap className="h-4 w-4" /> },
-  { id: '19', title: 'Comprehensive Discoveries', description: 'Detailed research findings and insights', url: '/discoveries/comprehensive', type: 'research', icon: <Microscope className="h-4 w-4" /> },
-  { id: '20', title: 'Comprehensive Insights', description: 'Deep-dive analysis of diabetes topics', url: '/insights/comprehensive', type: 'research', icon: <BookOpen className="h-4 w-4" /> },
-  
-  // Data & Research
-  { id: '4', title: 'Real Data Dashboard', description: 'Live data from multiple sources', url: '/real-data', type: 'data', icon: <Database className="h-4 w-4" /> },
-  { id: '5', title: 'Research Database', description: 'Comprehensive research collection', url: '/research', type: 'research', icon: <BookOpen className="h-4 w-4" /> },
-  { id: '6', title: 'RSS Feed Dashboard', description: 'Curated content from RSS feeds', url: '/rss-feed-dashboard', type: 'data', icon: <Globe className="h-4 w-4" /> },
-  { id: '21', title: 'Comprehensive Sources', description: 'All data sources with live links', url: '/sources/comprehensive', type: 'data', icon: <Database className="h-4 w-4" /> },
-  
-  // Community & Insights
-  { id: '7', title: 'Community Hub', description: 'Community insights and discussions', url: '/community', type: 'community', icon: <Users className="h-4 w-4" /> },
-  { id: '8', title: 'Live Feed', description: 'Real-time community updates', url: '/live-feed', type: 'community', icon: <Activity className="h-4 w-4" /> },
-  { id: '9', title: 'Mega Discoveries', description: 'Major breakthrough discoveries', url: '/mega-discoveries', type: 'research', icon: <Heart className="h-4 w-4" /> },
-  
-  // Analytics & Patterns
-  { id: '10', title: 'Analytics Dashboard', description: 'Comprehensive data analytics', url: '/analytics-dashboard', type: 'data', icon: <BarChart3 className="h-4 w-4" /> },
-  { id: '11', title: 'Advanced Patterns', description: 'Complex pattern analysis', url: '/advanced-patterns', type: 'research', icon: <Microscope className="h-4 w-4" /> },
-  { id: '12', title: 'Correlation Analysis', description: 'Data correlation insights', url: '/advanced-correlation-dashboard', type: 'research', icon: <TrendingUp className="h-4 w-4" /> },
-  
-  // Integration & Tools
-  { id: '13', title: 'JAEB Integration', description: 'Clinical trial data integration', url: '/jaeb-integration', type: 'data', icon: <Shield className="h-4 w-4" /> },
-  { id: '14', title: 'Comprehensive Integration', description: 'Multi-source data integration', url: '/comprehensive-integration', type: 'data', icon: <Globe className="h-4 w-4" /> },
-  { id: '15', title: 'Public Data', description: 'Publicly available datasets', url: '/public-data', type: 'data', icon: <Database className="h-4 w-4" /> },
-  
-  // Quick Access
-  { id: '16', title: 'Dashboard', description: 'Main platform dashboard', url: '/dashboard', type: 'page', icon: <Activity className="h-4 w-4" /> },
-  { id: '17', title: 'Profile', description: 'User profile and settings', url: '/profile', type: 'page', icon: <User className="h-4 w-4" /> },
-  { id: '18', title: 'Settings', description: 'Platform configuration', url: '/settings', type: 'page', icon: <Settings className="h-4 w-4" /> }
+  { id: '1', title: 'Home', description: 'Main dashboard and overview', url: '/', type: 'page', icon: <Home className="h-4 w-4" /> },
+  { id: '2', title: 'Discoveries', description: 'Latest research findings and discoveries', url: '/discoveries', type: 'research', icon: <Search className="h-4 w-4" /> },
+  { id: '3', title: 'Insights', description: 'AI-powered insights and analysis', url: '/insights', type: 'research', icon: <Brain className="h-4 w-4" /> },
+  { id: '4', title: 'Sources', description: 'Data sources and research repositories', url: '/sources', type: 'data', icon: <Database className="h-4 w-4" /> },
+  { id: '5', title: 'Community', description: 'User community and discussions', url: '/community', type: 'community', icon: <Users className="h-4 w-4" /> },
+  { id: '6', title: 'Comprehensive Discoveries', description: 'Detailed discoveries with live links', url: '/discoveries/comprehensive', type: 'research', icon: <FileText className="h-4 w-4" /> },
+  { id: '7', title: 'Comprehensive Insights', description: 'Detailed insights with live links', url: '/insights/comprehensive', type: 'research', icon: <Brain className="h-4 w-4" /> },
+  { id: '8', title: 'Comprehensive Sources', description: 'Detailed data sources with live links', url: '/sources/comprehensive', type: 'data', icon: <Database className="h-4 w-4" /> },
+  { id: '9', title: 'Device Issues', description: 'Diabetes device problems and solutions', url: '/device-issues', type: 'research', icon: <AlertTriangle className="h-4 w-4" /> },
 ]
 
 export default function ModernNavigation() {
@@ -166,6 +146,10 @@ export default function ModernNavigation() {
             <Link href="/analytics-dashboard" className="nav-link">
               <BarChart3 className="h-4 w-4 mr-2" />
               Analytics
+            </Link>
+            <Link href="/device-issues" className="nav-link">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Device Issues
             </Link>
           </div>
 
