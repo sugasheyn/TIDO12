@@ -38,11 +38,14 @@ const searchData: SearchResult[] = [
   { id: '1', title: 'AI Insights Dashboard', description: 'Advanced AI-powered research insights', url: '/ai-insights-dashboard', type: 'page', icon: <Brain className="h-4 w-4" /> },
   { id: '2', title: 'Pattern Detection', description: 'AI-detected patterns and correlations', url: '/patterns', type: 'research', icon: <TrendingUp className="h-4 w-4" /> },
   { id: '3', title: 'Advanced Discovery', description: 'Deep AI research discovery', url: '/discoveries', type: 'research', icon: <Zap className="h-4 w-4" /> },
+  { id: '19', title: 'Comprehensive Discoveries', description: 'Detailed research findings and insights', url: '/discoveries/comprehensive', type: 'research', icon: <Microscope className="h-4 w-4" /> },
+  { id: '20', title: 'Comprehensive Insights', description: 'Deep-dive analysis of diabetes topics', url: '/insights/comprehensive', type: 'research', icon: <BookOpen className="h-4 w-4" /> },
   
   // Data & Research
   { id: '4', title: 'Real Data Dashboard', description: 'Live data from multiple sources', url: '/real-data', type: 'data', icon: <Database className="h-4 w-4" /> },
   { id: '5', title: 'Research Database', description: 'Comprehensive research collection', url: '/research', type: 'research', icon: <BookOpen className="h-4 w-4" /> },
   { id: '6', title: 'RSS Feed Dashboard', description: 'Curated content from RSS feeds', url: '/rss-feed-dashboard', type: 'data', icon: <Globe className="h-4 w-4" /> },
+  { id: '21', title: 'Comprehensive Sources', description: 'All data sources with live links', url: '/sources/comprehensive', type: 'data', icon: <Database className="h-4 w-4" /> },
   
   // Community & Insights
   { id: '7', title: 'Community Hub', description: 'Community insights and discussions', url: '/community', type: 'community', icon: <Users className="h-4 w-4" /> },
@@ -140,9 +143,17 @@ export default function ModernNavigation() {
               <Database className="h-4 w-4 mr-2" />
               Data
             </Link>
+            <Link href="/sources/comprehensive" className="nav-link">
+              <Database className="h-4 w-4 mr-2" />
+              Sources
+            </Link>
             <Link href="/discoveries" className="nav-link">
               <Brain className="h-4 w-4 mr-2" />
               Discoveries
+            </Link>
+            <Link href="/insights/comprehensive" className="nav-link">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Insights
             </Link>
             <Link href="/patterns" className="nav-link">
               <TrendingUp className="h-4 w-4 mr-2" />
@@ -250,9 +261,17 @@ export default function ModernNavigation() {
               <Database className="h-4 w-4 mr-2 inline" />
               Data
             </Link>
+            <Link href="/sources/comprehensive" className="block px-3 py-2 nav-link">
+              <Database className="h-4 w-4 mr-2 inline" />
+              Sources
+            </Link>
             <Link href="/discoveries" className="block px-3 py-2 nav-link">
               <Brain className="h-4 w-4 mr-2 inline" />
               Discoveries
+            </Link>
+            <Link href="/insights/comprehensive" className="block px-3 py-2 nav-link">
+              <BookOpen className="h-4 w-4 mr-2 inline" />
+              Insights
             </Link>
             <Link href="/patterns" className="block px-3 py-2 nav-link">
               <TrendingUp className="h-4 w-4 mr-2 inline" />
