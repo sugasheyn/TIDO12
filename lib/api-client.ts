@@ -1,10 +1,15 @@
 import { DataSource, SourceContent, SourceHealth, CollectionJob } from './types'
 
-class ApiClient {
+export class APIClient {
   private baseUrl: string
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api'
+    // Enhanced safety for Replit environment
+    if (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_BASE_URL) {
+      this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL
+    } else {
+      this.baseUrl = '/api'
+    }
   }
 
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -130,5 +135,5 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient()
+export const apiClient = new APIClient()
 export default apiClient

@@ -1,7 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,21 +10,48 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { Users, Heart, MessageCircle, Share2, TrendingUp, Globe, Search, Filter, Lightbulb, Brain, Calendar, MapPin, Award } from "lucide-react"
-import { AuthGuard } from "@/components/auth/auth-guard"
+import { Users, Heart, MessageCircle, Share2, TrendingUp, Globe, Search, Filter, Lightbulb, Brain, Calendar, MapPin, Award, Activity } from "lucide-react"
 import Link from "next/link"
-import { dataGenerator } from "@/lib/data-generator"
-import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils";
+import { realAPIs } from "@/lib/real-apis"
+import ModernNavigation from "@/components/modern-navigation"
+import { safeNumberFormat, safeDateFormat, safeTimeFormat, safeDateOnlyFormat } from "@/lib/utils"
 
 export default function CommunityPage() {
-  const { data: session } = useSession()
   const [activeTab, setActiveTab] = useState("overview")
   const [searchQuery, setSearchQuery] = useState("")
+  const [communityData, setCommunityData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadCommunityData = async () => {
+      try {
+        setIsLoading(true)
+        const data = await realAPIs.getAllRealData()
+        setCommunityData(data)
+      } catch (error) {
+        console.error('Error loading community data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCommunityData()
+  }, [])
 
   // Generate dynamic community data based on real T1D research
-  const communityStats = dataGenerator.generateCommunityData()
+  const communityStats = communityData ? {
+    totalMembers: communityData.totalItems || 0,
+    activeDiscussions: Math.floor((communityData.totalItems || 0) * 0.3),
+    researchPapers: Math.floor((communityData.totalItems || 0) * 0.4),
+    insights: Math.floor((communityData.totalItems || 0) * 0.2)
+  } : {
+    totalMembers: 0,
+    activeDiscussions: 0,
+    researchPapers: 0,
+    insights: 0
+  }
 
-  const recentActivities = [
+  const recentActivities = communityData ? [
     {
       id: 1,
       type: "discussion",
@@ -56,7 +82,7 @@ export default function CommunityPage() {
       engagement: 156,
       category: "Insights"
     }
-  ]
+  ] : []
 
   const topContributors = [
     {
@@ -98,33 +124,107 @@ export default function CommunityPage() {
     {
       id: 2,
       title: "CGM Technology Workshop",
-      date: "2024-03-20",
-      time: "16:00 UTC",
+      date: "2024-03-22",
+      time: "10:00 UTC",
       type: "Hybrid",
       attendees: 89,
-      description: "Hands-on workshop on latest CGM technologies"
+      description: "Hands-on workshop for continuous glucose monitoring systems"
     }
   ]
 
-  const getUserInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+        <ModernNavigation />
+        <div className="pt-20 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading community data...</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <ModernNavigation />
+      
+      {/* Header */}
+      <section className="pt-20 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">T1D Community Hub</h1>
-            <p className="text-lg text-gray-600">Connect, collaborate, and contribute to the global T1D community</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              T1D Community Hub
+            </h1>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Connect with researchers, healthcare professionals, patients, and families 
+              in the Type 1 Diabetes community. Share insights, discover research, and build connections.
+            </p>
           </div>
 
+          {/* Search Bar */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Input
+                type="text"
+                placeholder="Search community discussions, research, insights..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 pr-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Users className="h-8 w-8 text-blue-600" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {safeNumberFormat(communityStats.totalMembers)}
+              </div>
+              <div className="text-gray-600">Community Members</div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <MessageCircle className="h-8 w-8 text-green-600" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {safeNumberFormat(communityStats.activeDiscussions)}
+              </div>
+              <div className="text-gray-600">Active Discussions</div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Brain className="h-8 w-8 text-purple-600" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {safeNumberFormat(communityStats.researchPapers)}
+              </div>
+              <div className="text-gray-600">Research Papers</div>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Lightbulb className="h-8 w-8 text-orange-600" />
+              </div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {safeNumberFormat(communityStats.insights)}
+              </div>
+              <div className="text-gray-600">Community Insights</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -135,139 +235,90 @@ export default function CommunityPage() {
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
-              {/* Community Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="text-center">
-                  <CardContent className="p-4">
-                    <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
-                    <div className="text-2xl font-bold text-blue-600">{safeNumberFormat(communityStats.totalMembers)}</div>
-                    <div className="text-sm text-gray-600">Total Members</div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Recent Activities */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5" />
+                      Recent Activities
+                    </CardTitle>
+                    <CardDescription>
+                      Latest community interactions and discussions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {recentActivities.map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-gray-50">
+                        <Avatar className="w-10 h-10">
+                          <AvatarImage src={activity.avatar} />
+                          <AvatarFallback>{activity.author.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-gray-900">{activity.title}</span>
+                            <Badge variant="secondary">{activity.category}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-2">by {activity.author}</p>
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>{activity.timestamp}</span>
+                            <span className="flex items-center">
+                              <Heart className="h-3 w-3 mr-1" />
+                              {activity.engagement}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
-                <Card className="text-center">
-                  <CardContent className="p-4">
-                    <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-600" />
-                    <div className="text-2xl font-bold text-green-600">{safeNumberFormat(communityStats.activeToday)}</div>
-                    <div className="text-sm text-gray-600">Active Today</div>
-                  </CardContent>
-                </Card>
-                <Card className="text-center">
-                  <CardContent className="p-4">
-                    <Globe className="h-8 w-8 mx-auto mb-2 text-purple-600" />
-                    <div className="text-2xl font-bold text-purple-600">{communityStats.countries}</div>
-                    <div className="text-sm text-gray-600">Countries</div>
-                  </CardContent>
-                </Card>
-                <Card className="text-center">
-                  <CardContent className="p-4">
-                    <Brain className="h-8 w-8 mx-auto mb-2 text-orange-600" />
-                    <div className="text-2xl font-bold text-orange-600">{communityStats.researchProjects}</div>
-                    <div className="text-sm text-gray-600">Research Projects</div>
+
+                {/* Top Contributors */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Award className="h-5 w-5" />
+                      Top Contributors
+                    </CardTitle>
+                    <CardDescription>
+                      Community members with the most valuable contributions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {topContributors.map((contributor) => (
+                      <div key={contributor.id} className="flex items-center space-x-3 p-3 rounded-lg border">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src={contributor.avatar} />
+                          <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="font-medium text-gray-900">{contributor.name}</span>
+                            <Badge variant="default">{contributor.badge}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-1">{contributor.expertise}</p>
+                          <p className="text-xs text-gray-500">{contributor.contributions} contributions</p>
+                        </div>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
               </div>
-
-              {/* Recent Activity */}
-              <Card className="shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5 text-yellow-600" />
-                    Recent Community Activity
-                  </CardTitle>
-                  <CardDescription>
-                    Latest discussions, research updates, and community insights
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={activity.avatar} alt={activity.author} />
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-blue-600 text-white text-sm font-medium">
-                          {getUserInitials(activity.author)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="text-xs">
-                            {activity.category}
-                          </Badge>
-                          <span className="text-xs text-gray-500">{activity.timestamp}</span>
-                        </div>
-                        <h4 className="font-semibold text-gray-900 mb-1">{activity.title}</h4>
-                        <p className="text-sm text-gray-600">by {activity.author}</p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <MessageCircle className="h-4 w-4" />
-                            {activity.engagement}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Top Contributors */}
-              <Card className="shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-yellow-600" />
-                    Top Community Contributors
-                  </CardTitle>
-                  <CardDescription>
-                    Recognizing our most active and valuable community members
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {topContributors.map((contributor) => (
-                      <div key={contributor.id} className="text-center p-4 bg-gray-50 rounded-lg">
-                        <Avatar className="h-16 w-16 mx-auto mb-3">
-                          <AvatarImage src={contributor.avatar} alt={contributor.name} />
-                          <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-blue-600 text-white text-lg font-medium">
-                            {getUserInitials(contributor.name)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <h4 className="font-semibold text-gray-900 mb-1">{contributor.name}</h4>
-                        <p className="text-sm text-gray-600 mb-2">{contributor.expertise}</p>
-                        <Badge variant="secondary" className="mb-2">
-                          {contributor.badge}
-                        </Badge>
-                        <p className="text-xs text-gray-500">{contributor.contributions} contributions</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
             {/* Discussions Tab */}
             <TabsContent value="discussions" className="space-y-6">
-              <Card className="shadow-lg border-0">
+              <Card>
                 <CardHeader>
                   <CardTitle>Community Discussions</CardTitle>
                   <CardDescription>
                     Join conversations about T1D management, research, and experiences
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Search discussions..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button variant="outline">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filter
-                    </Button>
-                  </div>
-                  <div className="text-center py-8 text-gray-500">
-                    <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>Discussions feature coming soon!</p>
-                    <p className="text-sm">You'll be able to create and participate in community discussions.</p>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500">
+                    <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                    <p>Discussion features coming soon!</p>
                   </div>
                 </CardContent>
               </Card>
@@ -275,18 +326,17 @@ export default function CommunityPage() {
 
             {/* Research Tab */}
             <TabsContent value="research" className="space-y-6">
-              <Card className="shadow-lg border-0">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Community Research Projects</CardTitle>
+                  <CardTitle>Research & Publications</CardTitle>
                   <CardDescription>
-                    Collaborate on T1D research initiatives and studies
+                    Latest research papers and publications from the T1D community
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-center py-8 text-gray-500">
-                    <Brain className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>Research collaboration features coming soon!</p>
-                    <p className="text-sm">You'll be able to join research projects and contribute to studies.</p>
+                <CardContent>
+                  <div className="text-center py-12 text-gray-500">
+                    <Brain className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                    <p>Research content coming soon!</p>
                   </div>
                 </CardContent>
               </Card>
@@ -294,56 +344,48 @@ export default function CommunityPage() {
 
             {/* Events Tab */}
             <TabsContent value="events" className="space-y-6">
-              <Card className="shadow-lg border-0">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Upcoming Community Events</CardTitle>
+                  <CardTitle>Upcoming Events</CardTitle>
                   <CardDescription>
-                    Join virtual and in-person events to connect with the T1D community
+                    Join virtual and in-person events with the T1D community
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  {upcomingEvents.map((event) => (
-                    <div key={event.id} className="border rounded-lg p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-2">{event.title}</h4>
+                <CardContent>
+                  <div className="space-y-4">
+                    {upcomingEvents.map((event) => (
+                      <div key={event.id} className="flex items-start space-x-4 p-4 rounded-lg border hover:bg-gray-50">
+                        <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <Calendar className="h-8 w-8 text-blue-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-gray-900 mb-2">{event.title}</h3>
                           <p className="text-sm text-gray-600 mb-3">{event.description}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {new Date(event.date).toLocaleDateString()}
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span className="flex items-center">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {safeDateFormat(event.date)}
                             </span>
-                            <span>{event.time}</span>
-                            <Badge variant="outline">{event.type}</Badge>
-                            <span>{event.attendees} attending</span>
+                            <span className="flex items-center">
+                              <MapPin className="h-3 w-3 mr-1" />
+                              {event.type}
+                            </span>
+                            <span className="flex items-center">
+                              <Users className="h-3 w-3 mr-1" />
+                              {event.attendees} attending
+                            </span>
                           </div>
                         </div>
                         <Button size="sm">Join Event</Button>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
-
-          {/* Quick Actions */}
-          <div className="mt-8 text-center">
-            <div className="inline-flex gap-2">
-              <Button asChild>
-                <Link href="/community-hub">
-                  Explore Full Community Hub
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/profile">
-                  Update My Profile
-                </Link>
-              </Button>
-            </div>
-          </div>
         </div>
-      </div>
-    </AuthGuard>
+      </section>
+    </div>
   )
 }

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -34,9 +33,10 @@ import {
 import { T1DUsernameGenerator } from "@/lib/username-generator"
 import { UserProfile } from "@/lib/types"
 import Link from "next/link"
+import ModernNavigation from "@/components/modern-navigation"
+import { safeDateOnlyFormat } from "@/lib/utils"
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession()
   const router = useRouter()
   
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
@@ -65,15 +65,8 @@ export default function ProfilePage() {
   const [suggestedUsernames, setSuggestedUsernames] = useState<string[]>([])
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/signin")
-      return
-    }
-
-    if (status === "authenticated" && session?.user) {
-      loadUserProfile()
-    }
-  }, [status, session, router])
+    loadUserProfile()
+  }, [])
 
   const loadUserProfile = async () => {
     setIsLoading(true)
@@ -196,11 +189,11 @@ export default function ProfilePage() {
     setIsEditing(false)
   }
 
-  if (status === "loading" || isLoading) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your profile...</p>
         </div>
       </div>
@@ -212,450 +205,460 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-            <p className="text-gray-600 mt-1">
-              Manage your account and preferences
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="outline" asChild>
-              <Link href="/dashboard">
-                <Activity className="h-4 w-4 mr-2" />
-                Dashboard
-              </Link>
-            </Button>
-            {!isEditing && (
-              <Button onClick={() => setIsEditing(true)}>
-                <Edit3 className="h-4 w-4 mr-2" />
-                Edit Profile
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      <ModernNavigation />
+      
+      <div className="pt-20 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">Profile Settings</h1>
+              <p className="text-xl text-gray-600 mt-2">
+                Manage your account and preferences
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/dashboard">
+                  <Activity className="h-4 w-4 mr-2" />
+                  Dashboard
+                </Link>
               </Button>
-            )}
+              {!isEditing && (
+                <Button onClick={() => setIsEditing(true)}>
+                  <Edit3 className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Alerts */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {success && (
-          <Alert>
-            <Check className="h-4 w-4" />
-            <AlertDescription>{success}</AlertDescription>
-          </Alert>
-        )}
+          {/* Alerts */}
+          {error && (
+            <Alert className="mb-6">
+              <X className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          {success && (
+            <Alert className="mb-6">
+              <Check className="h-4 w-4" />
+              <AlertDescription>{success}</AlertDescription>
+            </Alert>
+          )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Information */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5" />
-                  Profile Information
-                </CardTitle>
-                <CardDescription>
-                  Your personal information and diabetes details
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Username Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="username" className="text-base font-semibold">
-                      Username
-                    </Label>
-                    {isEditing && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={generateUsernameSuggestions}
-                        className="flex items-center gap-2"
-                      >
-                        <RefreshCw className="h-4 w-4" />
-                        New Suggestions
-                      </Button>
-                    )}
-                  </div>
-
-                  {isEditing ? (
-                    <div className="space-y-4">
-                      {/* Username Suggestions */}
-                      {suggestedUsernames.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {suggestedUsernames.map((username, index) => (
-                            <Button
-                              key={index}
-                              type="button"
-                              variant={editForm.username === username ? "default" : "outline"}
-                              className="justify-start h-auto p-3"
-                              onClick={() => handleUsernameChange(username)}
-                            >
-                              <span className="font-mono text-sm">{username}</span>
-                            </Button>
-                          ))}
-                        </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile Information */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Profile Information
+                  </CardTitle>
+                  <CardDescription>
+                    Your personal information and diabetes details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Username Section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="username" className="text-base font-semibold">
+                        Username
+                      </Label>
+                      {isEditing && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={generateUsernameSuggestions}
+                          className="flex items-center gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          New Suggestions
+                        </Button>
                       )}
+                    </div>
 
-                      {/* Custom Username Input */}
-                      <div className="space-y-2">
-                        <Label htmlFor="customUsername">Or enter a custom username</Label>
-                        <Input
-                          id="customUsername"
-                          type="text"
-                          placeholder="Enter custom username"
-                          value={editForm.username}
-                          onChange={(e) => handleUsernameChange(e.target.value)}
-                          className="font-mono"
-                        />
-                        {!usernameValidation.isValid && (
-                          <div className="space-y-1">
-                            {usernameValidation.errors.map((error, index) => (
-                              <div key={index} className="flex items-center gap-2 text-sm text-red-600">
-                                <X className="h-4 w-4" />
-                                {error}
-                              </div>
+                    {isEditing ? (
+                      <div className="space-y-4">
+                        {/* Username Suggestions */}
+                        {suggestedUsernames.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {suggestedUsernames.map((username, index) => (
+                              <Button
+                                key={index}
+                                type="button"
+                                variant={editForm.username === username ? "default" : "outline"}
+                                className="justify-start h-auto p-3"
+                                onClick={() => handleUsernameChange(username)}
+                              >
+                                <span className="font-mono text-sm">{username}</span>
+                              </Button>
                             ))}
                           </div>
                         )}
-                        {usernameValidation.isValid && editForm.username && (
-                          <div className="flex items-center gap-2 text-sm text-green-600">
-                            <Check className="h-4 w-4" />
-                            Username is available
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-mono text-lg font-semibold">{userProfile.username}</p>
-                        <p className="text-sm text-gray-500">Your unique identifier</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                <Separator />
-
-                {/* Basic Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="displayName">Display Name</Label>
-                    {isEditing ? (
-                      <Input
-                        id="displayName"
-                        type="text"
-                        placeholder="How should we call you?"
-                        value={editForm.displayName}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
-                      />
+                        {/* Custom Username Input */}
+                        <div className="space-y-2">
+                          <Label htmlFor="customUsername">Or enter a custom username</Label>
+                          <Input
+                            id="customUsername"
+                            type="text"
+                            placeholder="Enter custom username"
+                            value={editForm.username}
+                            onChange={(e) => handleUsernameChange(e.target.value)}
+                            className="font-mono"
+                          />
+                          {!usernameValidation.isValid && (
+                            <div className="space-y-1">
+                              {usernameValidation.errors.map((error, index) => (
+                                <div key={index} className="flex items-center gap-2 text-sm text-red-600">
+                                  <X className="h-4 w-4" />
+                                  {error}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          {usernameValidation.isValid && editForm.username && (
+                            <div className="flex items-center gap-2 text-sm text-green-600">
+                              <Check className="h-4 w-4" />
+                              Username is available
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     ) : (
-                      <div className="p-3 rounded-lg bg-gray-50">
-                        <p className="text-gray-900">
-                          {userProfile.displayName || "Not set"}
-                        </p>
+                      <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-mono text-lg font-semibold">{userProfile.username}</p>
+                          <p className="text-sm text-gray-500">Your unique identifier</p>
+                        </div>
                       </div>
                     )}
                   </div>
 
+                  <Separator />
+
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="displayName">Display Name</Label>
+                      {isEditing ? (
+                        <Input
+                          id="displayName"
+                          type="text"
+                          placeholder="How should we call you?"
+                          value={editForm.displayName}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, displayName: e.target.value }))}
+                        />
+                      ) : (
+                        <div className="p-3 rounded-lg bg-gray-50">
+                          <p className="text-gray-900">
+                            {userProfile.displayName || "Not set"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="diabetesType">Diabetes Type</Label>
+                      {isEditing ? (
+                        <Select
+                          value={editForm.diabetesType}
+                          onValueChange={(value: "type1" | "type2" | "gestational" | "other") => 
+                            setEditForm(prev => ({ ...prev, diabetesType: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="type1">Type 1 Diabetes</SelectItem>
+                            <SelectItem value="type2">Type 2 Diabetes</SelectItem>
+                            <SelectItem value="gestational">Gestational Diabetes</SelectItem>
+                            <SelectItem value="other">Other/Pre-diabetes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="p-3 rounded-lg bg-gray-50">
+                          <p className="text-gray-900 capitalize">
+                            {userProfile.diabetesType.replace(/([A-Z])/g, ' $1').trim()}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                      {isEditing ? (
+                        <Input
+                          id="dateOfBirth"
+                          type="date"
+                          value={editForm.dateOfBirth}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                        />
+                      ) : (
+                        <div className="p-3 rounded-lg bg-gray-50">
+                          <p className="text-gray-900">
+                            {userProfile.dateOfBirth || "Not set"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="diagnosisDate">Diagnosis Date</Label>
+                      {isEditing ? (
+                        <Input
+                          id="diagnosisDate"
+                          type="date"
+                          value={editForm.diagnosisDate}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, diagnosisDate: e.target.value }))}
+                        />
+                      ) : (
+                        <div className="p-3 rounded-lg bg-gray-50">
+                          <p className="text-gray-900">
+                            {userProfile.diagnosisDate || "Not set"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location</Label>
+                      {isEditing ? (
+                        <Input
+                          id="location"
+                          type="text"
+                          placeholder="City, Country"
+                          value={editForm.location}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                        />
+                      ) : (
+                        <div className="p-3 rounded-lg bg-gray-50">
+                          <p className="text-gray-900">
+                            {userProfile.location || "Not set"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="units">Preferred Units</Label>
+                      {isEditing ? (
+                        <Select
+                          value={editForm.units}
+                          onValueChange={(value: "mg/dL" | "mmol/L") => 
+                            setEditForm(prev => ({ ...prev, units: value }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mg/dL">mg/dL (US)</SelectItem>
+                            <SelectItem value="mmol/L">mmol/L (International)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="p-3 rounded-lg bg-gray-50">
+                          <p className="text-gray-900">
+                            {userProfile.preferences.units}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Preferences */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5" />
+                    Notification Preferences
+                  </CardTitle>
+                  <CardDescription>
+                    Control how you receive updates and notifications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="notifications" className="text-base font-medium">
+                          In-app Notifications
+                        </Label>
+                        <p className="text-sm text-gray-500">
+                          Receive notifications about new discoveries and insights
+                        </p>
+                      </div>
+                      {isEditing ? (
+                        <Checkbox
+                          id="notifications"
+                          checked={editForm.notifications}
+                          onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, notifications: checked as boolean }))}
+                        />
+                      ) : (
+                        <Badge variant={userProfile.preferences.notifications ? "default" : "secondary"}>
+                          {userProfile.preferences.notifications ? "Enabled" : "Disabled"}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="emailUpdates" className="text-base font-medium">
+                          Email Updates
+                        </Label>
+                        <p className="text-sm text-gray-500">
+                          Receive email updates about important discoveries and research
+                        </p>
+                      </div>
+                      {isEditing ? (
+                        <Checkbox
+                          id="emailUpdates"
+                          checked={editForm.emailUpdates}
+                          onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, emailUpdates: checked as boolean }))}
+                        />
+                      ) : (
+                        <Badge variant={userProfile.preferences.emailUpdates ? "default" : "secondary"}>
+                          {userProfile.preferences.emailUpdates ? "Enabled" : "Disabled"}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
                   <div className="space-y-2">
-                    <Label htmlFor="diabetesType">Diabetes Type</Label>
+                    <Label htmlFor="privacyLevel">Privacy Level</Label>
                     {isEditing ? (
                       <Select
-                        value={editForm.diabetesType}
-                        onValueChange={(value: any) => setEditForm(prev => ({ ...prev, diabetesType: value }))}
+                        value={editForm.privacyLevel}
+                        onValueChange={(value: "public" | "friends" | "private") => 
+                          setEditForm(prev => ({ ...prev, privacyLevel: value }))
+                        }
                       >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="type1">Type 1 Diabetes</SelectItem>
-                          <SelectItem value="type2">Type 2 Diabetes</SelectItem>
-                          <SelectItem value="gestational">Gestational Diabetes</SelectItem>
-                          <SelectItem value="prediabetes">Prediabetes</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="public">Public - Share insights with the community</SelectItem>
+                          <SelectItem value="friends">Friends - Share with trusted connections</SelectItem>
+                          <SelectItem value="private">Private - Keep insights to yourself</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
                       <div className="p-3 rounded-lg bg-gray-50">
                         <p className="text-gray-900 capitalize">
-                          {userProfile.diabetesType.replace(/([A-Z])/g, ' $1').trim()}
+                          {userProfile.preferences.privacyLevel}
                         </p>
                       </div>
                     )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                    {isEditing ? (
-                      <Input
-                        id="dateOfBirth"
-                        type="date"
-                        value={editForm.dateOfBirth}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, dateOfBirth: e.target.value }))}
-                      />
-                    ) : (
-                      <div className="p-3 rounded-lg bg-gray-50">
-                        <p className="text-gray-900">
-                          {userProfile.dateOfBirth || "Not set"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="diagnosisDate">Diagnosis Date</Label>
-                    {isEditing ? (
-                      <Input
-                        id="diagnosisDate"
-                        type="date"
-                        value={editForm.diagnosisDate}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, diagnosisDate: e.target.value }))}
-                      />
-                    ) : (
-                      <div className="p-3 rounded-lg bg-gray-50">
-                        <p className="text-gray-900">
-                          {userProfile.diagnosisDate || "Not set"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    {isEditing ? (
-                      <Input
-                        id="location"
-                        type="text"
-                        placeholder="City, Country"
-                        value={editForm.location}
-                        onChange={(e) => setEditForm(prev => ({ ...prev, location: e.target.value }))}
-                      />
-                    ) : (
-                      <div className="p-3 rounded-lg bg-gray-50">
-                        <p className="text-gray-900">
-                          {userProfile.location || "Not set"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="units">Preferred Units</Label>
-                    {isEditing ? (
-                      <Select
-                        value={editForm.units}
-                        onValueChange={(value: any) => setEditForm(prev => ({ ...prev, units: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mg/dL">mg/dL (US)</SelectItem>
-                          <SelectItem value="mmol/L">mmol/L (International)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="p-3 rounded-lg bg-gray-50">
-                        <p className="text-gray-900">
-                          {userProfile.preferences.units}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Preferences */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Notification Preferences
-                </CardTitle>
-                <CardDescription>
-                  Control how you receive updates and notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="notifications" className="text-base font-medium">
-                        In-app Notifications
-                      </Label>
-                      <p className="text-sm text-gray-500">
-                        Receive notifications about new discoveries and insights
-                      </p>
-                    </div>
-                    {isEditing ? (
-                      <Checkbox
-                        id="notifications"
-                        checked={editForm.notifications}
-                        onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, notifications: checked as boolean }))}
-                      />
-                    ) : (
-                      <Badge variant={userProfile.preferences.notifications ? "default" : "secondary"}>
-                        {userProfile.preferences.notifications ? "Enabled" : "Disabled"}
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="emailUpdates" className="text-base font-medium">
-                        Email Updates
-                      </Label>
-                      <p className="text-sm text-gray-500">
-                        Receive email updates about important discoveries and research
-                      </p>
-                    </div>
-                    {isEditing ? (
-                      <Checkbox
-                        id="emailUpdates"
-                        checked={editForm.emailUpdates}
-                        onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, emailUpdates: checked as boolean }))}
-                      />
-                    ) : (
-                      <Badge variant={userProfile.preferences.emailUpdates ? "default" : "secondary"}>
-                        {userProfile.preferences.emailUpdates ? "Enabled" : "Disabled"}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label htmlFor="privacyLevel">Privacy Level</Label>
-                  {isEditing ? (
-                    <Select
-                      value={editForm.privacyLevel}
-                      onValueChange={(value: any) => setEditForm(prev => ({ ...prev, privacyLevel: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="public">Public - Share insights with the community</SelectItem>
-                        <SelectItem value="friends">Friends - Share with trusted connections</SelectItem>
-                        <SelectItem value="private">Private - Keep insights to yourself</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="p-3 rounded-lg bg-gray-50">
-                      <p className="text-gray-900 capitalize">
-                        {userProfile.preferences.privacyLevel}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Edit Actions */}
-            {isEditing && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-end space-x-3">
-                    <Button variant="outline" onClick={handleCancelEdit}>
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSaveProfile} disabled={isSaving}>
-                      <Save className="h-4 w-4 mr-2" />
-                      {isSaving ? "Saving..." : "Save Changes"}
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            )}
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Account Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Account Summary
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50">
-                  <Mail className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{userProfile.email}</p>
-                    <p className="text-xs text-gray-500">Email address</p>
+              {/* Edit Actions */}
+              {isEditing && (
+                <Card className="shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-end space-x-3">
+                      <Button variant="outline" onClick={handleCancelEdit}>
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button onClick={handleSaveProfile} disabled={isSaving}>
+                        <Save className="h-4 w-4 mr-2" />
+                        {isSaving ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Account Summary */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    Account Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-50">
+                    <Mail className="h-5 w-5 text-blue-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{userProfile.email}</p>
+                      <p className="text-xs text-gray-500">Email address</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-green-50">
-                  <Calendar className="h-5 w-5 text-green-600" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {safeDateOnlyFormat(userProfile.createdAt)}
-                    </p>
-                    <p className="text-xs text-gray-500">Member since</p>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-green-50">
+                    <Calendar className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {safeDateOnlyFormat(userProfile.createdAt)}
+                      </p>
+                      <p className="text-xs text-gray-500">Member since</p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center space-x-3 p-3 rounded-lg bg-purple-50">
-                  <Activity className="h-5 w-5 text-purple-600" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {safeDateOnlyFormat(userProfile.updatedAt)}
-                    </p>
-                    <p className="text-xs text-gray-500">Last updated</p>
+                  <div className="flex items-center space-x-3 p-3 rounded-lg bg-purple-50">
+                    <Activity className="h-5 w-5 text-purple-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        {safeDateOnlyFormat(userProfile.updatedAt)}
+                      </p>
+                      <p className="text-xs text-gray-500">Last updated</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" asChild className="w-full justify-start">
-                  <Link href="/dashboard">
-                    <Activity className="h-4 w-4 mr-2" />
-                    Go to Dashboard
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild className="w-full justify-start">
-                  <Link href="/settings">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Account Settings
-                  </Link>
-                </Button>
-                <Button variant="outline" asChild className="w-full justify-start">
-                  <Link href="/privacy">
-                    <Shield className="h-4 w-4 mr-2" />
-                    Privacy Policy
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
+              {/* Quick Actions */}
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" asChild className="w-full justify-start">
+                    <Link href="/dashboard">
+                      <Activity className="h-4 w-4 mr-2" />
+                      Go to Dashboard
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full justify-start">
+                    <Link href="/settings">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Account Settings
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild className="w-full justify-start">
+                    <Link href="/privacy">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Privacy Policy
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

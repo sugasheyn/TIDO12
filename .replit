@@ -1,5 +1,5 @@
 language = "nodejs"
-run = "npm run dev"
+run = "bash start-replit.sh"
 entrypoint = "app/page.tsx"
 
 [nix]
@@ -10,9 +10,10 @@ NODE_ENV = "development"
 NEXT_PUBLIC_APP_NAME = "T1D AI Platform"
 NEXT_PUBLIC_APP_VERSION = "2.0.0"
 NEXT_PUBLIC_API_BASE_URL = "/api"
-NEXTAUTH_SECRET = "replit-deployment-secret-key-change-in-production"
-GOOGLE_CLIENT_SECRET = "optional"
-GITHUB_SECRET = "optional"
+NEXT_PUBLIC_PLATFORM_MODE = "demo"
+NEXT_PUBLIC_ENABLE_RSS_FEEDS = "true"
+NEXT_PUBLIC_ENABLE_REAL_DATA = "true"
+NEXT_PUBLIC_ENABLE_AI_INSIGHTS = "true"
 
 [packager]
 language = "nodejs"
@@ -27,12 +28,18 @@ syntax = "javascript"
 
 [languages.typescript]
 pattern = "**/*.ts"
-syntax = "typescript"
+syntax = "tsx"
 
 [languages.tsx]
 pattern = "**/*.tsx"
 syntax = "tsx"
 
 [deployment]
-run = ["sh", "-c", "npm run build && npm start"]
+run = ["bash", "start-replit.sh"]
 deploymentTarget = "cloudrun"
+
+[env.NODE_ENV]
+value = "production"
+
+[env.NEXT_PUBLIC_APP_ENVIRONMENT]
+value = "replit"

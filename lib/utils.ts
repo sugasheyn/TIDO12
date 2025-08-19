@@ -65,3 +65,56 @@ export function safeDateOnlyFormat(date: Date | string | undefined | null, fallb
     return fallback
   }
 }
+
+// Safe storage utilities for Replit compatibility
+export function safeLocalStorageGet(key: string, fallback: any = null): any {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const item = window.localStorage.getItem(key)
+      return item ? JSON.parse(item) : fallback
+    }
+    return fallback
+  } catch (error) {
+    console.warn('localStorage access failed:', error)
+    return fallback
+  }
+}
+
+export function safeLocalStorageSet(key: string, value: any): boolean {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(key, JSON.stringify(value))
+      return true
+    }
+    return false
+  } catch (error) {
+    console.warn('localStorage set failed:', error)
+    return false
+  }
+}
+
+export function safeSessionStorageGet(key: string, fallback: any = null): any {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const item = window.sessionStorage.getItem(key)
+      return item ? JSON.parse(item) : fallback
+    }
+    return fallback
+  } catch (error) {
+    console.warn('sessionStorage access failed:', error)
+    return fallback
+  }
+}
+
+export function safeSessionStorageSet(key: string, value: any): boolean {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(key, JSON.stringify(value))
+      return true
+    }
+    return false
+  } catch (error) {
+    console.warn('sessionStorage set failed:', error)
+    return false
+  }
+}
