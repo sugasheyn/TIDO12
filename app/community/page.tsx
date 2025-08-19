@@ -150,7 +150,7 @@ export default function CommunityPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <ModernNavigation />
       
-      {/* Header */}
+          {/* Header */}
       <section className="pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
@@ -207,8 +207,8 @@ export default function CommunityPage() {
                 {safeNumberFormat(communityStats.researchPapers)}
               </div>
               <div className="text-gray-600">Research Papers</div>
-            </div>
-            
+          </div>
+
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
                 <Lightbulb className="h-8 w-8 text-orange-600" />
@@ -238,52 +238,52 @@ export default function CommunityPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Recent Activities */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
                       <Activity className="h-5 w-5" />
                       Recent Activities
-                    </CardTitle>
-                    <CardDescription>
+                  </CardTitle>
+                  <CardDescription>
                       Latest community interactions and discussions
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {recentActivities.map((activity) => (
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {recentActivities.map((activity) => (
                       <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-gray-50">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={activity.avatar} />
                           <AvatarFallback>{activity.author.charAt(0)}</AvatarFallback>
-                        </Avatar>
+                      </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-1">
                             <span className="font-medium text-gray-900">{activity.title}</span>
                             <Badge variant="secondary">{activity.category}</Badge>
-                          </div>
+                        </div>
                           <p className="text-sm text-gray-600 mb-2">by {activity.author}</p>
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span>{activity.timestamp}</span>
                             <span className="flex items-center">
                               <Heart className="h-3 w-3 mr-1" />
-                              {activity.engagement}
-                            </span>
-                          </div>
+                            {activity.engagement}
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
 
-                {/* Top Contributors */}
+              {/* Top Contributors */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
                       <Award className="h-5 w-5" />
                       Top Contributors
-                    </CardTitle>
-                    <CardDescription>
+                  </CardTitle>
+                  <CardDescription>
                       Community members with the most valuable contributions
-                    </CardDescription>
-                  </CardHeader>
+                  </CardDescription>
+                </CardHeader>
                   <CardContent className="space-y-4">
                     {topContributors.map((contributor) => (
                       <div key={contributor.id} className="flex items-center space-x-3 p-3 rounded-lg border">
@@ -297,12 +297,12 @@ export default function CommunityPage() {
                             <Badge variant="default">{contributor.badge}</Badge>
                           </div>
                           <p className="text-sm text-gray-600 mb-1">{contributor.expertise}</p>
-                          <p className="text-xs text-gray-500">{contributor.contributions} contributions</p>
+                        <p className="text-xs text-gray-500">{contributor.contributions} contributions</p>
                         </div>
                       </div>
                     ))}
-                  </CardContent>
-                </Card>
+                </CardContent>
+              </Card>
               </div>
             </TabsContent>
 
@@ -353,7 +353,7 @@ export default function CommunityPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {upcomingEvents.map((event) => (
+                  {upcomingEvents.map((event) => (
                       <div key={event.id} className="flex items-start space-x-4 p-4 rounded-lg border hover:bg-gray-50">
                         <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
                           <Calendar className="h-8 w-8 text-blue-600" />
@@ -379,13 +379,13 @@ export default function CommunityPage() {
                         <Button size="sm">Join Event</Button>
                       </div>
                     ))}
-                  </div>
+                    </div>
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
+            </div>
       </section>
-    </div>
+      </div>
   )
 }

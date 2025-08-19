@@ -105,8 +105,8 @@ export default function Home() {
           <div className="absolute top-20 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
           <div className="absolute top-40 right-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '1s'}}></div>
           <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float" style={{animationDelay: '2s'}}></div>
-        </div>
-
+          </div>
+          
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="animate-slide-up">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8">
@@ -165,7 +165,7 @@ export default function Home() {
               to deliver actionable insights for diabetes research and management.
             </p>
           </div>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <div 
@@ -202,7 +202,7 @@ export default function Home() {
                 <div className="card-modern p-8 text-center group cursor-pointer">
                   <div className={`w-16 h-16 ${action.color} rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     {action.icon}
-                  </div>
+            </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">
                     {action.title}
                   </h3>
@@ -210,12 +210,12 @@ export default function Home() {
                   <div className="flex items-center justify-center text-blue-600 font-medium group-hover:text-blue-700">
                     Get Started
                     <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
+            </div>
+            </div>
               </Link>
             ))}
-          </div>
-        </div>
+            </div>
+            </div>
       </section>
 
       {/* Why Choose Us Section */}
@@ -228,13 +228,13 @@ export default function Home() {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               We're not just another research platform. We're your AI-powered partner in diabetes discovery.
             </p>
-          </div>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
                 <Target className="h-10 w-10" />
-              </div>
+            </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Precision Focused</h3>
               <p className="text-gray-600 leading-relaxed">
                 Every feature is designed specifically for diabetes research, ensuring relevance and accuracy.
@@ -244,7 +244,7 @@ export default function Home() {
             <div className="text-center">
               <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
                 <Rocket className="h-10 w-10" />
-              </div>
+            </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Lightning Fast</h3>
               <p className="text-gray-600 leading-relaxed">
                 AI-powered search and analysis deliver insights in seconds, not hours or days.
@@ -260,8 +260,8 @@ export default function Home() {
                 Machine learning algorithms continuously improve and discover new patterns automatically.
               </p>
             </div>
-          </div>
-        </div>
+                </div>
+              </div>
       </section>
 
       {/* CTA Section */}
@@ -286,9 +286,9 @@ export default function Home() {
                 <CheckCircle className="mr-2 h-5 w-5" />
                 Explore Data
               </button>
-            </Link>
-          </div>
-        </div>
+                    </Link>
+                </div>
+              </div>
       </section>
 
       {/* Footer */}
@@ -325,7 +325,7 @@ export default function Home() {
                 <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
                 <li><Link href="/api" className="hover:text-white transition-colors">API</Link></li>
               </ul>
-            </div>
+              </div>
             
             <div>
               <h3 className="text-lg font-semibold mb-4">Company</h3>
@@ -341,7 +341,7 @@ export default function Home() {
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; 2024 T1D AI Platform. All rights reserved.</p>
           </div>
-        </div>
+      </div>
       </footer>
     </div>
   )
